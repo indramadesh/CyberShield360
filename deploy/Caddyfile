@@ -1,0 +1,31 @@
+# CyberShield 360 — production reverse proxy with automatic HTTPS.
+# Caddy fetches + renews a free Let's Encrypt certificate for {$DOMAIN}
+# (needs ports 80 + 443 open and DNS A record -> this server's public IP).
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	# API, health and docs go to the FastAPI backend container.
+	@api path /api/* /health /ready /docs /redoc /openapi.json
+	handle @api {
+		reverse_proxy backend:8000
+	}
+
+	# Everything else is the static SPA (and /downloads/*.zip). SPA fallback
+	# serves index.html for client-side routes; real files (zip) are served as-is.
+	handle {
+		root * /srv/www
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		X-Frame-Options "DENY"
+	}
+}
