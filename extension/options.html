@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>CyberShield 360 — Settings</title>
+  </head>
+  <body>
+    <div class="options">
+      <div class="brand"><span class="logo">🛡</span><span>CyberShield 360 — Settings</span></div>
+
+      <div class="card mt2">
+        <div class="field">
+          <label for="apiBase">Backend URL</label>
+          <input type="text" id="apiBase" placeholder="http://localhost:8000" />
+          <div class="small muted">Where the CyberShield 360 backend is reachable.</div>
+        </div>
+        <div class="field">
+          <label for="appUrl">Website URL</label>
+          <input type="text" id="appUrl" placeholder="http://localhost:5173" />
+        </div>
+        <div class="row">
+          <button id="testBtn" class="btn">Test connection</button>
+          <button id="grantBtn" class="btn">Grant access to backend host</button>
+          <span id="testResult" class="small muted"></span>
+        </div>
+      </div>
+
+      <div class="card mt2">
+        <div class="field row between">
+          <div><label>Protection</label><div class="small muted">Block known-malicious sites via network rules.</div></div>
+          <label class="switch"><input type="checkbox" id="protectionEnabled" /><span class="slider"></span></label>
+        </div>
+        <div class="field">
+          <label for="protectionLevel">Protection level</label>
+          <select id="protectionLevel">
+            <option value="standard">Standard — block known threats, warn on suspicious</option>
+            <option value="enhanced">Enhanced — stronger checks (uses backend more)</option>
+          </select>
+        </div>
+        <div class="field row between">
+          <div><label>Automatic page checks</label>
+            <div class="small muted">Scan every page you open and warn/block automatically — no clicking needed. The URL you visit is sent to your backend.</div></div>
+          <label class="switch"><input type="checkbox" id="autoScan" /><span class="slider"></span></label>
+        </div>
+        <div class="field">
+          <label for="riskThreshold">Block threshold (risk score 0–100)</label>
+          <input type="text" id="riskThreshold" inputmode="numeric" placeholder="50" />
+          <div class="small muted">At or above this score the page is blocked; below it you get a details notification.</div>
+        </div>
+        <div class="field row between">
+          <div><label>Notify for lower-risk pages</label>
+            <div class="small muted">Show a details notification when a checked page is below the block threshold.</div></div>
+          <label class="switch"><input type="checkbox" id="notifyBelowThreshold" /><span class="slider"></span></label>
+        </div>
+        <div class="field">
+          <label for="trustedSites">Trusted sites (one domain per line)</label>
+          <textarea id="trustedSites" placeholder="example.com"></textarea>
+          <div class="small muted">These domains are never blocked. Add only sites you fully trust.</div>
+        </div>
+      </div>
+
+      <div class="row mt2">
+        <button id="saveBtn" class="btn primary">Save settings</button>
+        <button id="clearCacheBtn" class="btn">Clear cache</button>
+        <span id="saveResult" class="small muted"></span>
+      </div>
+
+      <hr class="hr" />
+      <div class="small muted">
+        Version <span id="version">—</span> ·
+        <a id="docs" href="#" target="_blank">Documentation &amp; privacy</a>
+      </div>
+      <p class="small muted mt">
+        CyberShield 360 never collects passwords, OTPs or payment details, and does not
+        upload your browsing history. URLs you choose to analyze are sent to the backend
+        you configure above.
+      </p>
+    </div>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

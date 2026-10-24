@@ -1,0 +1,13 @@
+{
+  "name": "cybershield360-extension",
+  "version": "1.0.0",
+  "description": "CyberShield 360 Browser Protection — Chrome MV3 extension.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "package": "node scripts/package.mjs",
+    "build": "node scripts/validate.mjs && node scripts/package.mjs",
+    "test": "node --test tests/shared.test.mjs"
+  }
+}

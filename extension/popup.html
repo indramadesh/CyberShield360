@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>CyberShield 360</title>
+  </head>
+  <body class="popup">
+    <div class="wrap">
+      <div class="row between">
+        <div class="brand"><span class="logo">🛡</span><span>CyberShield&nbsp;360</span></div>
+        <span id="statusPill" class="badge" style="color:#34d399;background:rgba(52,211,153,0.14)">● On</span>
+      </div>
+
+      <div class="card mt">
+        <div class="row between">
+          <div><div style="font-weight:600">Automatic protection</div><div class="small muted">Scan &amp; block sites as you browse</div></div>
+          <label class="switch" title="Automatic protection on/off">
+            <input type="checkbox" id="autoToggle" /><span class="slider"></span>
+          </label>
+        </div>
+        <hr class="hr" style="margin:10px 0" />
+        <div class="row between">
+          <div><div style="font-weight:600">Manual scanning</div><div class="small muted">On-demand tools below</div></div>
+          <label class="switch" title="Manual scanning on/off">
+            <input type="checkbox" id="manualToggle" /><span class="slider"></span>
+          </label>
+        </div>
+        <div id="statusLine" class="small muted mt">—</div>
+      </div>
+
+      <div id="currentCard" class="card mt">
+        <div class="small muted">Current site</div>
+        <div id="domain" class="row" style="font-weight:600;word-break:break-all;margin-top:2px;">—</div>
+        <div id="result" class="mt"></div>
+        <button id="analyzeBtn" class="btn primary block mt">Analyze this site</button>
+      </div>
+
+      <div id="scanCard" class="card mt">
+        <label for="scanType" class="small">Scan something</label>
+        <select id="scanType">
+          <option value="URL">URL / link</option>
+          <option value="MESSAGE">Message (SMS / chat)</option>
+          <option value="EMAIL">Email</option>
+          <option value="QR">QR code (image)</option>
+          <option value="IMAGE">Image / screenshot</option>
+          <option value="WEBSITE">Website (sandbox)</option>
+        </select>
+        <div id="scanInput" class="mt"></div>
+        <div id="scanHint" class="small muted"></div>
+        <button id="scanBtn" class="btn primary block mt">Scan</button>
+        <div id="scanResult" class="mt"></div>
+      </div>
+
+      <hr class="hr" />
+      <div class="row between small">
+        <a id="openApp" href="#">Open dashboard ↗</a>
+        <a id="openOptions" href="#">Settings</a>
+      </div>
+      <div class="row between small mt">
+        <span id="conn" class="muted">—</span>
+        <a id="privacy" href="#">Privacy</a>
+      </div>
+      <p class="small muted mt">Assessments, not guarantees — results always show the evidence.</p>
+    </div>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

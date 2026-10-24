@@ -1,0 +1,60 @@
+# Deploy-target composition. Not required for local dev on this machine
+# (dev runs natively on SQLite + eager tasks). Brings up the full stack.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cybershield
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: cybershield
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cybershield"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  backend:
+    build: ./backend
+    environment:
+      APP_ENV: production
+      DATABASE_PROVIDER: postgresql
+      DATABASE_URL: postgresql+psycopg://cybershield:${POSTGRES_PASSWORD:-change-me}@postgres:5432/cybershield
+      REDIS_ENABLED: "true"
+      REDIS_URL: redis://redis:6379/0
+      TASK_BACKEND: celery
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_started }
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports: ["8000:8000"]
+
+  worker:
+    build: ./backend
+    environment:
+      DATABASE_PROVIDER: postgresql
+      DATABASE_URL: postgresql+psycopg://cybershield:${POSTGRES_PASSWORD:-change-me}@postgres:5432/cybershield
+      REDIS_ENABLED: "true"
+      REDIS_URL: redis://redis:6379/0
+      TASK_BACKEND: celery
+    depends_on:
+      backend: { condition: service_started }
+    # Celery worker (Phase 5 wires the website-sandbox task). Isolate this
+    # service's egress in production for SSRF safety.
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=info"]
+
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["5173:80"]
+
+volumes:
+  pgdata:
