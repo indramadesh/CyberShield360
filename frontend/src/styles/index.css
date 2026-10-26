@@ -2,95 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   CyberShield 360 — shadcn/ui theme tokens (HSL triplets).
-   Dark-first "security operations console": charcoal surfaces,
-   muted borders, one indigo accent, semantic risk colors.
-   Light theme supported via the default (:root) values; the
-   .dark class (toggled by useTheme) applies the dark palette.
-   ============================================================ */
+/* ==========================================================================
+   CyberShield360 design tokens — ONE brand identity (emerald/teal).
+   Light (:root) is the default; .dark is the cinematic dark variant, chosen
+   with the theme toggle and remembered as localStorage "cs360-theme".
+   Red / amber / orange / blue are SEMANTIC status colours, never alt themes.
+   Values are HSL triplets consumed via hsl(var(--token)).
+   ========================================================================== */
 
 :root {
-  --background: 210 20% 98%;
-  --foreground: 222 30% 12%;
+  --background: 150 30% 97%;
+  --background-2: 150 25% 94%;
+  --foreground: 168 45% 9%;
+  --subtle-foreground: 165 9% 42%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 30% 12%;
+  --card-foreground: 168 45% 9%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222 30% 12%;
+  --popover-foreground: 168 45% 9%;
 
-  --primary: 226 64% 52%;
+  --primary: 161 84% 30%;
   --primary-foreground: 0 0% 100%;
+  --primary-2: 164 80% 36%;
 
-  --secondary: 210 16% 95%;
-  --secondary-foreground: 222 25% 20%;
-  --muted: 210 16% 95%;
-  --muted-foreground: 215 16% 42%;
-  --accent: 210 16% 94%;
-  --accent-foreground: 222 25% 20%;
+  --secondary: 155 25% 92%;
+  --secondary-foreground: 168 45% 12%;
+  --muted: 155 22% 93%;
+  --muted-foreground: 165 12% 33%;
+  --accent: 155 25% 91%;
+  --accent-foreground: 168 45% 12%;
 
-  --destructive: 0 72% 48%;
+  --destructive: 357 75% 48%;
   --destructive-foreground: 0 0% 100%;
 
-  /* Semantic security tokens (+ soft tints for badge backgrounds) */
-  --success: 152 62% 34%;
-  --success-soft: 152 50% 92%;
-  --warning: 32 80% 40%;
-  --warning-soft: 36 85% 92%;
-  --high: 22 85% 46%;
-  --high-soft: 24 85% 92%;
-  --danger: 0 72% 48%;
-  --danger-soft: 0 75% 94%;
-  --info: 210 80% 46%;
-  --info-soft: 210 85% 94%;
+  --success: 161 84% 28%;
+  --success-soft: 155 50% 91%;
+  --warning: 32 92% 36%;
+  --warning-soft: 38 90% 91%;
+  --high: 21 85% 42%;
+  --high-soft: 22 85% 92%;
+  --danger: 357 75% 47%;
+  --danger-soft: 357 80% 95%;
+  --info: 207 80% 40%;
+  --info-soft: 207 85% 94%;
 
-  --border: 214 20% 89%;
-  --input: 214 20% 86%;
-  --ring: 226 64% 52%;
+  --border: 155 18% 84%;
+  --input: 155 18% 80%;
+  --ring: 161 84% 30%;
 
-  --radius: 0.6rem;
+  --chart-1: 161 84% 30%;
+  --chart-2: 174 70% 38%;
+  --chart-3: 207 80% 45%;
+  --chart-4: 36 92% 45%;
+  --chart-5: 357 75% 50%;
+
+  --radius: 0.75rem;
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 220ms;
 }
 
 .dark {
-  --background: 222 24% 7%;
-  --foreground: 210 20% 92%;
+  --background: 169 48% 5%;          /* #06110F */
+  --background-2: 168 43% 7%;        /* #0A1916 */
+  --foreground: 152 39% 94%;         /* #E8F5EF */
+  --subtle-foreground: 156 11% 49%;  /* #708C81 muted text */
 
-  --card: 222 22% 10%;
-  --card-foreground: 210 20% 92%;
-  --popover: 222 22% 10%;
-  --popover-foreground: 210 20% 92%;
+  --card: 167 37% 10%;               /* #10231F elevated surface */
+  --card-foreground: 152 39% 94%;
+  --popover: 167 37% 9%;
+  --popover-foreground: 152 39% 94%;
 
-  --primary: 226 70% 64%;
-  --primary-foreground: 222 40% 8%;
+  --primary: 160 80% 50%;            /* #19E6A0 */
+  --primary-foreground: 169 60% 5%;
+  --primary-2: 164 90% 61%;          /* #42F5C5 */
 
-  --secondary: 222 16% 15%;
-  --secondary-foreground: 210 20% 92%;
-  --muted: 222 16% 15%;
-  --muted-foreground: 216 14% 62%;
-  --accent: 222 16% 17%;
-  --accent-foreground: 210 20% 92%;
+  --secondary: 167 39% 14%;          /* #15302A interactive surface */
+  --secondary-foreground: 152 39% 94%;
+  --muted: 167 32% 12%;
+  --muted-foreground: 157 17% 67%;   /* #9BB8AD secondary text */
+  --accent: 167 39% 14%;
+  --accent-foreground: 152 39% 94%;
 
-  --destructive: 0 70% 56%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive: 357 100% 68%;       /* #FF5D65 */
+  --destructive-foreground: 169 60% 5%;
 
-  --success: 152 55% 50%;
-  --success-soft: 152 40% 16%;
-  --warning: 38 92% 56%;
-  --warning-soft: 36 40% 16%;
-  --high: 24 90% 60%;
-  --high-soft: 22 45% 16%;
-  --danger: 0 70% 62%;
-  --danger-soft: 0 40% 18%;
-  --info: 210 85% 62%;
-  --info-soft: 210 45% 16%;
+  --success: 160 80% 50%;
+  --success-soft: 160 55% 11%;
+  --warning: 36 100% 67%;            /* #FFBD59 */
+  --warning-soft: 36 45% 11%;
+  --high: 21 100% 65%;
+  --high-soft: 21 45% 11%;
+  --danger: 357 100% 68%;
+  --danger-soft: 357 42% 12%;
+  --info: 207 100% 69%;              /* #63B8FF */
+  --info-soft: 207 42% 12%;
 
-  --border: 222 16% 18%;
-  --input: 222 16% 22%;
-  --ring: 226 70% 64%;
+  --border: 162 30% 18%;             /* #203B33 */
+  --input: 162 30% 20%;
+  --ring: 160 80% 50%;
+
+  --chart-1: 160 80% 50%;
+  --chart-2: 164 90% 61%;
+  --chart-3: 207 100% 69%;
+  --chart-4: 36 100% 67%;
+  --chart-5: 357 100% 68%;
 }
 
 @layer base {
   * { border-color: hsl(var(--border)); }
+  html, body, #root { min-height: 100%; }
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
@@ -98,7 +119,49 @@
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
   }
-  html, body, #root { height: 100%; }
+  /* Restrained ambient light on application backgrounds (dark only). */
+  .dark body {
+    background-image:
+      radial-gradient(60rem 36rem at 85% -12%, hsl(var(--primary) / 0.07), transparent 60%),
+      radial-gradient(40rem 28rem at -10% 8%, hsl(var(--primary-2) / 0.04), transparent 60%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3 { letter-spacing: -0.015em; }
+  :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+}
+
+@layer components {
+  /* Soft emerald glow for the single primary action on a surface. */
+  .glow-primary {
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 10px 30px -12px hsl(var(--primary) / 0.6);
+  }
+  /* Restrained glass surface: used only on top of artwork (auth, hero). */
+  .surface-glass {
+    background: hsl(var(--card) / 0.62);
+    border: 1px solid hsl(var(--border) / 0.9);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .text-brand-gradient {
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-2)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Faint network grid for selected sections. */
+  .grid-texture {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.35) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .eyebrow {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
+  }
 }
 
 /* Themed, unobtrusive scrollbars. */
@@ -110,10 +173,17 @@
   border: 2px solid hsl(var(--background));
 }
 
+/* Motion: honor the OS setting AND the in-app "Reduce motion" setting. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }

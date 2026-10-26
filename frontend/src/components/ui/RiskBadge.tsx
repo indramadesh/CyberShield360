@@ -20,7 +20,7 @@ export function RiskBadge({ level, size = "md" }: { level: RiskLevel; size?: "sm
       role="status"
       aria-label={m.label}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md font-semibold",
+        "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md font-semibold",
         size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm",
         m.cls,
       )}

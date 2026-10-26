@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from sqlalchemy import JSON, Boolean, String, Text
+import datetime as dt
+
+from sqlalchemy import JSON, Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin, UUIDMixin
@@ -19,6 +21,18 @@ class AwarenessContent(UUIDMixin, TimestampMixin, Base):
     body_md: Mapped[str] = mapped_column(Text, default="")
     quiz_json: Mapped[list] = mapped_column(JSON, default=list)
     status: Mapped[str] = mapped_column(String(16), default="published")  # draft|published|archived
+
+    # ---- Structured lesson fields (nullable: added to an existing table) ----
+    difficulty: Mapped[str | None] = mapped_column(String(16), nullable=True)  # beginner|intermediate|advanced
+    objective: Mapped[str | None] = mapped_column(Text, nullable=True)
+    example: Mapped[str | None] = mapped_column(Text, nullable=True)
+    warning_signs: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    prevention: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    related_slugs: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    source_refs: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    review_status: Mapped[str | None] = mapped_column(String(16), nullable=True)  # draft|reviewed
+    library_version: Mapped[int | None] = mapped_column(nullable=True)
+    updated_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class Challenge(UUIDMixin, TimestampMixin, Base):

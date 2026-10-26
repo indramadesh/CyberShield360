@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.enums import DEFAULT_THREAT_CATEGORIES, Role
-from app.db.base import utcnow
 from app.db.models.threat import ThreatCategory
 from app.db.models.threat_intel import ThreatIntel
 from app.db.models.user import User
@@ -103,27 +102,6 @@ _CHALLENGES = [
      1, "A bank won't use a generic gmail address for official security mail."),
 ]
 
-# Illustrative/demo entries — clearly not a live feed.
-_NEWS = [
-    ("[DEMO] Rise in UPI collect-request scams reported", "UPI collect-request frauds "
-     "are increasing; users are tricked into approving debits.", "CyberShield (demo)",
-     "", "fraud", "IN", "warning"),
-    ("[DEMO] Advisory: fake KYC-update links circulating", "Messages asking users to "
-     "'update KYC' via links continue to target bank customers.", "CyberShield (demo)",
-     "", "advisory", "IN", "info"),
-]
-
-_LAWS = [
-    ("MeitY", "Information Technology Act, 2000 (overview)", "in_force",
-     "https://www.meity.gov.in",
-     "[DEMO summary] India's primary law covering electronic records and cybercrime. "
-     "This is a plain-language overview, not legal advice."),
-    ("CERT-In", "CERT-In Directions, 2022 (overview)", "in_force",
-     "https://www.cert-in.org.in",
-     "[DEMO summary] Directions on cyber-incident reporting timelines and log "
-     "retention for certain entities. Overview only."),
-]
-
 _ORGS = [
     ("State Bank of India", ["onlinesbi.sbi", "sbi.co.in"], ["YONO SBI"], ["1800 1234"]),
     ("National Payments Corporation of India", ["npci.org.in"], ["BHIM"], []),
@@ -132,7 +110,7 @@ _ORGS = [
 
 def seed_learn_and_content(session: Session) -> None:
     from app.db.models.awareness import AwarenessContent, Challenge
-    from app.db.models.content import CyberLaw, NewsItem, OfficialOrg
+    from app.db.models.content import OfficialOrg
 
     if not session.query(AwarenessContent).first():
         for slug, cat, title, summary, body, quiz in _LESSONS:
@@ -143,15 +121,8 @@ def seed_learn_and_content(session: Session) -> None:
         for slug, kind, q, opts, ans, expl in _CHALLENGES:
             session.add(Challenge(slug=slug, kind=kind, question=q, options_json=opts,
                                   answer_index=ans, explanation=expl, active=True))
-    if not session.query(NewsItem).first():
-        now = utcnow()
-        for title, summary, src, url, cat, region, sev in _NEWS:
-            session.add(NewsItem(title=title, summary=summary, source=src, source_url=url,
-                                 category=cat, region=region, severity=sev, published_at=now))
-    if not session.query(CyberLaw).first():
-        for authority, title, status, src, summary in _LAWS:
-            session.add(CyberLaw(authority=authority, title=title, status=status,
-                                 official_source=src, plain_summary=summary))
+    # News and legal records now come from the content engine (real sources +
+    # curated, verified legal records) — no demo items are seeded.
     if not session.query(OfficialOrg).first():
         for name, domains, apps, channels in _ORGS:
             session.add(OfficialOrg(name=name, official_domains=domains,
@@ -160,7 +131,10 @@ def seed_learn_and_content(session: Session) -> None:
 
 
 def run_all(session: Session) -> None:
+    from app.content.seed import seed_content_engine
+
     seed_threat_categories(session)
     seed_threat_intel(session)
     seed_learn_and_content(session)
+    seed_content_engine(session)
     seed_dev_admin(session)

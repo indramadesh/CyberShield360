@@ -4,41 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
-    <title>CyberShield 360</title>
+    <title>CyberShield360</title>
   </head>
   <body class="popup">
     <div class="wrap">
       <div class="row between">
-        <div class="brand"><span class="logo">🛡</span><span>CyberShield&nbsp;360</span></div>
-        <span id="statusPill" class="badge" style="color:#34d399;background:rgba(52,211,153,0.14)">● On</span>
+        <div class="brand"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42F5C5"/><stop offset="1" stop-color="#19E6A0"/></linearGradient></defs><path d="M16 2.5 4.5 7v8.2c0 7 4.9 12.4 11.5 14.3 6.6-1.9 11.5-7.3 11.5-14.3V7L16 2.5Z" fill="rgba(25,230,160,0.12)" stroke="url(#lg)" stroke-width="2"/><path d="m11 16.2 3.4 3.4L21.5 12" fill="none" stroke="url(#lg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>CyberShield<span class="accent">360</span></span></div>
+        <button id="openOptions" class="icon-btn" aria-label="Settings" title="Settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
       </div>
 
-      <div class="card mt">
-        <div class="row between">
-          <div><div style="font-weight:600">Automatic protection</div><div class="small muted">Scan &amp; block sites as you browse</div></div>
-          <label class="switch" title="Automatic protection on/off">
-            <input type="checkbox" id="autoToggle" /><span class="slider"></span>
-          </label>
+      <!-- Current site status -->
+      <div id="currentCard" class="status-hero">
+        <div id="statusShield" class="shield-badge tone-unknown" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="64" height="64"><path d="M32 5 10 14v16c0 14 9.5 24.6 22 29 12.5-4.4 22-15 22-29V14L32 5Z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path id="statusMark" d="M22 32l7 7 13-14" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <hr class="hr" style="margin:10px 0" />
-        <div class="row between">
-          <div><div style="font-weight:600">Manual scanning</div><div class="small muted">On-demand tools below</div></div>
-          <label class="switch" title="Manual scanning on/off">
-            <input type="checkbox" id="manualToggle" /><span class="slider"></span>
-          </label>
-        </div>
-        <div id="statusLine" class="small muted mt">—</div>
-      </div>
-
-      <div id="currentCard" class="card mt">
-        <div class="small muted">Current site</div>
-        <div id="domain" class="row" style="font-weight:600;word-break:break-all;margin-top:2px;">—</div>
+        <div id="headline" class="headline" role="status">Not checked yet</div>
+        <div id="domain" class="small muted center">—</div>
         <div id="result" class="mt"></div>
-        <button id="analyzeBtn" class="btn primary block mt">Analyze this site</button>
+        <button id="analyzeBtn" class="btn primary block mt">Analyze This Site</button>
       </div>
 
-      <div id="scanCard" class="card mt">
-        <label for="scanType" class="small">Scan something</label>
+      <!-- Quick tools -->
+      <div id="tools" class="tiles mt">
+        <button class="tile" data-scan="URL"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Scan Link</span></button>
+        <button class="tile" data-scan="QR"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 18v3"/></svg><span>Scan QR</span></button>
+        <button class="tile" data-scan="MESSAGE"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg><span>Scan Text</span></button>
+        <button class="tile" data-scan="SETTINGS"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Settings</span></button>
+      </div>
+
+      <!-- On-demand scanner (opened from the tiles) -->
+      <div id="scanCard" class="card mt hidden">
+        <div class="row between">
+          <label for="scanType" class="small">Scan something</label>
+          <button id="closeScan" class="link-btn small" type="button">Close</button>
+        </div>
         <select id="scanType">
           <option value="URL">URL / link</option>
           <option value="MESSAGE">Message (SMS / chat)</option>
@@ -53,16 +54,32 @@
         <div id="scanResult" class="mt"></div>
       </div>
 
-      <hr class="hr" />
-      <div class="row between small">
-        <a id="openApp" href="#">Open dashboard ↗</a>
-        <a id="openOptions" href="#">Settings</a>
+      <!-- Protection switches -->
+      <div class="card mt">
+        <div class="row between">
+          <div>
+            <div class="row" style="gap:6px;font-weight:600"><span class="dot" id="protDot" style="color:#19E6A0"></span> Protection</div>
+            <div id="statusLine" class="small muted">—</div>
+          </div>
+          <label class="switch" title="Automatic protection on/off">
+            <input type="checkbox" id="autoToggle" aria-label="Automatic protection" /><span class="slider"></span>
+          </label>
+        </div>
+        <hr class="hr" style="margin:10px 0" />
+        <div class="row between">
+          <div><div style="font-weight:600">Manual tools</div><div class="small muted">Analyze button &amp; scan tiles</div></div>
+          <label class="switch" title="Manual scanning on/off">
+            <input type="checkbox" id="manualToggle" aria-label="Manual scanning tools" /><span class="slider"></span>
+          </label>
+        </div>
       </div>
+
       <div class="row between small mt">
+        <a id="openApp" href="#">Open dashboard ↗</a>
         <span id="conn" class="muted">—</span>
         <a id="privacy" href="#">Privacy</a>
       </div>
-      <p class="small muted mt">Assessments, not guarantees — results always show the evidence.</p>
+      <p class="small muted mt" style="text-align:center">Assessments, not guarantees — results show the evidence.</p>
     </div>
     <script type="module" src="popup.js"></script>
   </body>

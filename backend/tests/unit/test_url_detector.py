@@ -35,6 +35,9 @@ def test_redirect_and_tokens_flagged():
 def test_brand_impersonation_flagged():
     r = det.analyze("http://paypal.account-verify.example/login")
     assert "brand_impersonation" in _indicators(r)
+    sig = next(s for s in r.signals if s.indicator == "brand_impersonation")
+    # The official domain is exposed so the UI can show the genuine site.
+    assert sig.detail["official"] and sig.detail["brand"] == "paypal"
 
 
 def test_extracts_domain_indicator_for_intel():

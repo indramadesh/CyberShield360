@@ -23,6 +23,8 @@ os.environ.update(
     OCR_PROVIDER="mock",
     QR_DECODER="mock",
     RATE_LIMIT_ENABLED="false",  # dedicated test enables it locally
+    CONTENT_INGESTION_ENABLED="false",  # tests never fetch real feeds
+    CONTENT_SCHEDULER_EMBEDDED="false",
 )
 
 import pytest  # noqa: E402

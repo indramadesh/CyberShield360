@@ -29,6 +29,13 @@ def public_config(request: Request, session: Session = Depends(db_session)):
             "features": current_flags(),
             "threat_categories": categories,
             "risk_thresholds": runtime_config.effective_thresholds(),
+            # Real privacy configuration, so the UI never shows hardcoded claims.
+            "privacy": {
+                "data_retention_days": settings.data_retention_days,
+                "store_raw_uploads": settings.store_raw_uploads,
+                "pii_redaction": settings.pii_redaction_enabled,
+                "max_file_size_mb": settings.max_file_size_mb,
+            },
         },
         getattr(request.state, "request_id", None),
     )

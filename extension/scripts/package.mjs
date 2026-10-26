@@ -98,6 +98,22 @@ writeFileSync(zipPath, zipBuf);
 const sha = createHash("sha256").update(zipBuf).digest("hex");
 writeFileSync(join(artifacts, zipName + ".sha256"), `${sha}  ${zipName}\n`);
 
+// Release notes: the bullets under "## <VERSION>" in CHANGELOG.md (if present).
+function releaseNotes() {
+  const file = join(ROOT, "CHANGELOG.md");
+  if (!existsSync(file)) return [];
+  const lines = readFileSync(file, "utf8").split(/\r?\n/);
+  const start = lines.findIndex((l) => l.trim() === `## ${VERSION}`);
+  if (start < 0) return [];
+  const notes = [];
+  for (const l of lines.slice(start + 1)) {
+    if (l.startsWith("## ")) break;
+    const m = l.match(/^\s*[-*]\s+(.*)$/);
+    if (m) notes.push(m[1].trim());
+  }
+  return notes;
+}
+
 let commit = null;
 try { commit = execSync("git rev-parse --short HEAD", { cwd: REPO }).toString().trim(); } catch { /* no git */ }
 
@@ -113,6 +129,7 @@ const release = {
   permissions: manifest.permissions,
   optional_host_permissions: manifest.optional_host_permissions || [],
   file_count: files.length,
+  release_notes: releaseNotes(),
 };
 writeFileSync(join(artifacts, "release-manifest.json"), JSON.stringify(release, null, 2));
 

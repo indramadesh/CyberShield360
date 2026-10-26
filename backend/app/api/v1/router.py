@@ -7,6 +7,7 @@ from app.api.v1.routes import (
     admin,
     auth,
     awareness,
+    content,
     extension,
     incidents,
     meta,
@@ -25,6 +26,7 @@ api_router.include_router(awareness.router)
 api_router.include_router(awareness.challenges_router)
 api_router.include_router(incidents.router)
 api_router.include_router(news.router)
+api_router.include_router(content.router)
 api_router.include_router(reports.router)
 api_router.include_router(admin.router)
 api_router.include_router(extension.router)

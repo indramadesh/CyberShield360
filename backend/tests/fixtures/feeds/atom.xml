@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Atom Test</title>
+<entry><title>Ransomware group targets hospitals</title><id>urn:uuid:1</id>
+<link rel="alternate" href="https://atom.example.org/posts/1"/><published>2026-10-24T08:00:00Z</published>
+<updated>2026-10-25T09:00:00Z</updated><summary>Backups matter.</summary><category term="ransomware"/></entry>
+<entry><title>Relative link entry here</title><id>urn:uuid:2</id><link href="/posts/2"/><updated>2026-10-23T08:00:00Z</updated></entry>
+</feed>

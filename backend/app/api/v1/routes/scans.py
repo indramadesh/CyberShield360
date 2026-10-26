@@ -29,6 +29,26 @@ def _rid(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
 
 
+def _target_summary(scan) -> str:
+    """Short, privacy-safe description of what was scanned, for history lists.
+
+    `input_ref` is already PII-redacted at write time. For URL-like scans we also
+    drop the query string/fragment (often holds tokens, emails, search terms)."""
+    raw = (scan.input_ref or "").strip()
+    if not raw:
+        return ""
+    if scan.scan_type in (ScanType.URL.value, ScanType.WEBSITE.value):
+        from urllib.parse import urlsplit, urlunsplit
+
+        try:
+            p = urlsplit(raw if "://" in raw else f"http://{raw}")
+            return urlunsplit((p.scheme, p.netloc, p.path, "", ""))[:120]
+        except Exception:
+            return raw.split("?")[0][:120]
+    one_line = " ".join(raw.split())
+    return one_line[:80] + ("…" if len(one_line) > 80 else "")
+
+
 def _can_read(scan, user: User | None) -> bool:
     # Anonymous scans (no owner) are readable by holders of the id.
     if scan.user_id is None:
@@ -137,6 +157,7 @@ def get_scan(
         # Same shape as not-found to avoid leaking existence (anti-IDOR).
         raise NotFoundError("Scan not found.")
     ev = scan.evidence_json or {}
+    evidence = ev.get("evidence", [])
     return ok(
         {
             "scan_id": scan.id,
@@ -146,10 +167,13 @@ def get_scan(
             "risk_score": scan.risk_score,
             "confidence": scan.confidence,
             "category": scan.category,
-            "evidence": ev.get("evidence", []),
+            "evidence": evidence,
+            "indicators": sorted({e.get("indicator") for e in evidence if e.get("indicator")}),
             "recommendations": ev.get("recommendations", []),
             "notes": ev.get("notes", []),
             "explanation": ev.get("explanation", ""),
+            "target": _target_summary(scan),
+            "created_at": scan.created_at.isoformat() if scan.created_at else "",
         },
         _rid(request),
     )
@@ -172,6 +196,7 @@ def list_scans(
                 "risk_level": s.risk_level,
                 "risk_score": s.risk_score,
                 "category": s.category,
+                "target": _target_summary(s),
                 "created_at": s.created_at.isoformat() if s.created_at else "",
             }
             for s in scans

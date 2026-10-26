@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import db_session, require_feature
-from app.repositories.content_repository import LawRepository, NewsRepository
 from app.schemas.common import ok
 
 router = APIRouter(tags=["intelligence"])
@@ -15,26 +15,22 @@ def _rid(request):
 
 
 @router.get("/news", dependencies=[Depends(require_feature("cyber_news"))])
-def list_news(request: Request, limit: int = 20, offset: int = 0,
-              category: str | None = None, session: Session = Depends(db_session)):
-    items = NewsRepository(session).recent(limit=min(limit, 50), offset=offset, category=category)
-    return ok([
-        {"id": n.id, "title": n.title, "summary": n.summary, "source": n.source,
-         "source_url": n.source_url, "category": n.category, "region": n.region,
-         "severity": n.severity,
-         "published_at": n.published_at.isoformat() if n.published_at else None}
-        for n in items
-    ], _rid(request))
+def list_news(request: Request, limit: int = Query(20, ge=1, le=50), offset: int = Query(0, ge=0),
+              category: str | None = Query(None, max_length=32), session: Session = Depends(db_session)):
+    """Published articles collected by the content engine (newest by source date)."""
+    from app.api.v1.routes.content import article_dict
+    from app.db.models.content import NewsItem
+
+    stmt = select(NewsItem).where(NewsItem.status == "published")
+    if category:
+        stmt = stmt.where(NewsItem.category == category)
+    rows = session.scalars(stmt.order_by(NewsItem.published_at.is_(None), NewsItem.published_at.desc(),
+                                         NewsItem.created_at.desc()).limit(limit).offset(offset)).all()
+    return ok([article_dict(n) for n in rows], _rid(request))
 
 
 @router.get("/laws", dependencies=[Depends(require_feature("cyber_law"))])
 def list_laws(request: Request, session: Session = Depends(db_session)):
-    laws = LawRepository(session).all_ordered()
-    return ok([
-        {"id": law.id, "authority": law.authority, "title": law.title,
-         "status": law.status, "official_source": law.official_source,
-         "plain_summary": law.plain_summary,
-         "publication_date": law.publication_date.isoformat() if law.publication_date else None,
-         "effective_date": law.effective_date.isoformat() if law.effective_date else None}
-        for law in laws
-    ], _rid(request))
+    from app.api.v1.routes.content import _published_laws, law_dict
+
+    return ok([law_dict(l) for l in _published_laws(session)], _rid(request))

@@ -103,6 +103,22 @@ class Settings(BaseSettings):
     mock_llm: bool = True
     demo_mode: bool = True
 
+    # ---- Content-intelligence engine (no API keys required) ----
+    # IANA timezone that defines "today" for the daily lesson/quiz/tip.
+    content_timezone: str = "Asia/Kolkata"
+    # Fetch public feeds at all (off = serve stored content only, e.g. offline tests).
+    content_ingestion_enabled: bool = True
+    # Run the scheduler inside the API process (dev convenience). Production runs
+    # the dedicated worker: `python -m app.content.worker`.
+    content_scheduler_embedded: bool = False
+    content_user_agent: str = "CyberShield360-ContentBot/1.0 (+https://github.com/indramadesh/CyberShield360)"
+    # A section is shown as stale when its last successful refresh is older than this.
+    content_stale_hours: int = 12
+    # Pause a source after this many consecutive failures (admin can resume).
+    content_pause_after_failures: int = 20
+    # Articles older than this are pruned (by source publication date, else ingestion date).
+    content_retention_days: int = 365
+
     # ---- Risk thresholds (operator-tunable; not universal) ----
     risk_threshold_suspicious: int = 25
     risk_threshold_high: int = 50

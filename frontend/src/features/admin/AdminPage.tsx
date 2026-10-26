@@ -5,8 +5,11 @@ import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/states";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { ScanSearch, ShieldAlert, OctagonAlert } from "lucide-react";
 import { apiFetch } from "@/services/api";
 import { useAuth } from "@/features/auth/useAuth";
+import { ContentOps } from "./ContentOps";
 
 interface Analytics { total_scans: number; by_risk_level: Record<string, number>; by_category: Record<string, number>; by_type: Record<string, number> }
 interface AdminConfig { features: Record<string, boolean>; thresholds: Record<string, number> }
@@ -33,9 +36,9 @@ export function AdminPage() {
       <PageHeader title="Admin" description="Operational overview and runtime configuration." />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Stat label="Total scans" value={analytics.data?.total_scans} loading={analytics.isLoading} />
-        <Stat label="High-risk" value={analytics.data?.by_risk_level?.HIGH} loading={analytics.isLoading} />
-        <Stat label="Critical" value={analytics.data?.by_risk_level?.CRITICAL} loading={analytics.isLoading} />
+        <MetricCard icon={<ScanSearch />} label="Total scans" value={analytics.isLoading ? null : analytics.data?.total_scans ?? 0} />
+        <MetricCard icon={<ShieldAlert />} tone="warning" label="High-risk" value={analytics.isLoading ? null : analytics.data?.by_risk_level?.HIGH ?? 0} />
+        <MetricCard icon={<OctagonAlert />} tone="danger" label="Critical" value={analytics.isLoading ? null : analytics.data?.by_risk_level?.CRITICAL ?? 0} />
       </div>
 
       <Card className="mt-6">
@@ -74,17 +77,7 @@ export function AdminPage() {
           ))}
         </CardContent>
       </Card>
+      <ContentOps />
     </div>
-  );
-}
-
-function Stat({ label, value, loading }: { label: string; value?: number; loading?: boolean }) {
-  return (
-    <Card>
-      <CardContent className="p-5">
-        <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-        {loading ? <Skeleton className="mt-2 h-8 w-16" /> : <div className="mt-1 text-2xl font-semibold">{value ?? 0}</div>}
-      </CardContent>
-    </Card>
   );
 }

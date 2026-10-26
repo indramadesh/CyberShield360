@@ -1,5 +1,5 @@
 import { analyzeUrl, analyzeScan, analyzeWebsite, analyzeUpload, getHealth } from "./shared/api.js";
-import { getSettings, setSettings } from "./shared/storage.js";
+import { getSettings, setSettings, cacheGet } from "./shared/storage.js";
 import { riskMeta, safetyCaveat } from "./shared/risk.js";
 import { hostOf, isAnalyzable, normalizeUrl } from "./shared/url.js";
 
@@ -15,6 +15,21 @@ function badge(level) {
   return `<span class="badge" style="color:${m.tone};background:${m.bg}">${m.icon} ${esc(m.label)}</span>`;
 }
 
+// Big shield + headline for the current site. Colour is always paired with words.
+const HEADLINE = {
+  LOW: { tone: "low", html: 'This website looks <span class="t-low">safe</span>', mark: "M22 32l7 7 13-14" },
+  SUSPICIOUS: { tone: "warn", html: 'This website looks <span class="t-warn">suspicious</span>', mark: "M32 20v14M32 42v.5" },
+  HIGH: { tone: "high", html: 'This website looks <span class="t-high">dangerous</span>', mark: "M32 20v14M32 42v.5" },
+  CRITICAL: { tone: "crit", html: 'This website is <span class="t-crit">high risk</span>', mark: "M25 25l14 14M39 25 25 39" },
+};
+function renderHeadline(level, note) {
+  const h = HEADLINE[(level || "").toUpperCase()];
+  const shield = $("statusShield");
+  shield.className = `shield-badge tone-${h ? h.tone : "unknown"}`;
+  $("statusMark").setAttribute("d", h ? h.mark : "M26 26a6 6 0 1 1 8 5.6c-1.4.6-2 1.6-2 3V36M32 42v.5");
+  $("headline").innerHTML = h ? h.html : esc(note || "Not checked yet");
+}
+
 function renderResult(el, data) {
   if (data && data.status && data.status !== "COMPLETE") {
     el.innerHTML = `<div class="small">${esc(data.explanation || "Analysis could not be completed.")}</div>`;
@@ -24,7 +39,7 @@ function renderResult(el, data) {
   const ev = (data.evidence || []).filter((e) => (e.weight || 0) > 0).slice(0, 3);
   const recs = (data.recommendations || []).slice(0, 2);
   el.innerHTML = `
-    <div class="row between">${badge(data.risk_level)}<span class="small muted">${esc(data.category || "")} · ${conf}%</span></div>
+    <div class="row between">${badge(data.risk_level)}<span class="small muted">risk ${esc(data.risk_score)}/100 · ${conf}% sure</span></div>
     ${ev.length ? `<ul class="evidence small">${ev.map((e) => `<li>${esc(e.summary)}</li>`).join("")}</ul>` : ""}
     ${recs.length ? `<div class="small mt"><b>Do:</b> ${esc(recs[0])}</div>` : ""}
     <div class="small muted mt">${esc(safetyCaveat(data.risk_level))}</div>`;
@@ -32,21 +47,20 @@ function renderResult(el, data) {
 
 async function run(el, url) {
   if (!isAnalyzable(url)) {
-    el.innerHTML = `<div class="small muted">This page can't be analyzed (not an http/https address).</div>`;
+    renderHeadline(null, "This page can't be checked");
+    el.innerHTML = `<div class="small muted center">Only http/https pages can be analyzed.</div>`;
     return;
   }
-  el.innerHTML = `<div class="row small muted"><span class="spin"></span> Analyzing…</div>`;
+  el.innerHTML = `<div class="row small muted" style="justify-content:center"><span class="spin"></span> Analyzing…</div>`;
   try {
-    renderResult(el, await analyzeUrl(url));
+    const data = await analyzeUrl(url);
+    renderHeadline(data.status === "COMPLETE" ? data.risk_level : null, "Analysis unavailable");
+    renderResult(el, data);
   } catch (e) {
-    el.innerHTML = `<div class="small" style="color:#f87171">Could not analyze: ${esc(e.message)}.
+    renderHeadline(null, "Analysis unavailable");
+    el.innerHTML = `<div class="small" style="color:#FF5D65">Could not analyze: ${esc(e.message)}.
       <br/>Check the backend URL in Settings.</div>`;
   }
-}
-
-function setPill(text, color, bg) {
-  const p = $("statusPill");
-  p.textContent = text; p.style.color = color; p.style.background = bg;
 }
 
 function renderStatus(s) {
@@ -54,20 +68,14 @@ function renderStatus(s) {
   const manual = !!s.manualEnabled;
 
   // Show/hide the manual tools.
-  $("currentCard").classList.toggle("hidden", !manual);
-  $("scanCard").classList.toggle("hidden", !manual);
+  $("analyzeBtn").classList.toggle("hidden", !manual);
+  $("tools").classList.toggle("hidden", !manual);
+  if (!manual) $("scanCard").classList.add("hidden");
 
-  if (auto && manual) setPill("● Auto + Manual", "#34d399", "rgba(52,211,153,0.14)");
-  else if (auto) setPill("● Auto on", "#34d399", "rgba(52,211,153,0.14)");
-  else if (manual) setPill("● Manual", "#fbbf24", "rgba(251,191,36,0.14)");
-  else setPill("● Off", "#f87171", "rgba(248,113,113,0.14)");
-
-  const line = [];
-  line.push(auto
-    ? `Automatic: every page checked; blocked at ${s.riskThreshold ?? 50}%+.`
-    : "Automatic: off.");
-  line.push(manual ? "Manual: tools available below." : "Manual: off.");
-  $("statusLine").textContent = line.join(" ");
+  $("protDot").style.color = auto ? "#19E6A0" : "#FF5D65";
+  $("statusLine").innerHTML = auto
+    ? `Real-time protection is <b style="color:#19E6A0">ON</b> · blocks at ${esc(s.riskThreshold ?? 50)}+`
+    : `Real-time protection is <b style="color:#FF5D65">OFF</b>`;
 }
 
 const SCAN_META = {
@@ -112,14 +120,28 @@ async function doScan() {
     }
     renderResult(el, data);
   } catch (e) {
-    el.innerHTML = `<div class="small" style="color:#f87171">Could not analyze: ${esc(e.message)}.</div>`;
+    el.innerHTML = `<div class="small" style="color:#FF5D65">Could not analyze: ${esc(e.message)}.</div>`;
   }
+}
+
+function openScanner(type) {
+  $("scanType").value = type;
+  renderScanInput(type);
+  $("scanCard").classList.remove("hidden");
+  $("scanField")?.focus();
+  $("scanCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function setupScanner() {
   renderScanInput($("scanType").value);
   $("scanType").addEventListener("change", (e) => renderScanInput(e.target.value));
   $("scanBtn").addEventListener("click", doScan);
+  $("closeScan").addEventListener("click", () => $("scanCard").classList.add("hidden"));
+  document.querySelectorAll("[data-scan]").forEach((b) => b.addEventListener("click", () => {
+    const t = b.getAttribute("data-scan");
+    if (t === "SETTINGS") chrome.runtime.openOptionsPage();
+    else openScanner(t);
+  }));
 }
 
 async function init() {
@@ -138,6 +160,17 @@ async function init() {
     $("domain").textContent = hostOf(currentUrl) || currentUrl || "—";
   } catch { $("domain").textContent = "—"; }
 
+  // Show the result of the automatic check for this page, if there is one.
+  if (isAnalyzable(currentUrl)) {
+    const cached = await cacheGet("u:" + normalizeUrl(currentUrl), s.cacheTtlMin);
+    if (cached && cached.status === "COMPLETE") {
+      renderHeadline(cached.risk_level);
+      renderResult($("result"), cached);
+    }
+  } else if (currentUrl) {
+    renderHeadline(null, "This page can't be checked");
+  }
+
   $("analyzeBtn").addEventListener("click", () => run($("result"), currentUrl));
   setupScanner();
 
@@ -154,8 +187,8 @@ async function init() {
   });
 
   getHealth()
-    .then(() => { $("conn").textContent = "● Connected"; $("conn").style.color = "#34d399"; })
-    .catch(() => { $("conn").textContent = "● Backend offline"; $("conn").style.color = "#fb923c"; });
+    .then(() => { $("conn").textContent = "● Connected"; $("conn").style.color = "#19E6A0"; })
+    .catch(() => { $("conn").textContent = "● Backend offline"; $("conn").style.color = "#FF8B4D"; });
 }
 
 init();

@@ -3,9 +3,11 @@ from __future__ import annotations
 import datetime as dt
 
 from fastapi import APIRouter, Depends, Request
+from pydantic import BaseModel, Field
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.deps import db_session, get_current_user, require_feature
+from app.api.deps import db_session, get_current_user, get_optional_user, require_feature
 from app.core.errors import NotFoundError
 from app.db.models.user import User
 from app.repositories.content_repository import AwarenessRepository, ChallengeRepository
@@ -28,7 +30,9 @@ def _rid(request):
 
 
 def _summary(c):
-    return {"slug": c.slug, "category": c.category, "title": c.title, "summary": c.summary}
+    from app.api.v1.routes.content import lesson_dict
+
+    return lesson_dict(c)
 
 
 @router.get("", dependencies=[Depends(require_feature("awareness"))])
@@ -61,29 +65,80 @@ def recommendations(request: Request, session: Session = Depends(db_session),
 
 @router.get("/{slug}", dependencies=[Depends(require_feature("awareness"))])
 def get_lesson(slug: str, request: Request, session: Session = Depends(db_session)):
+    from app.api.v1.routes.content import lesson_dict
+    from app.content import quiz as quizsvc
+    from app.db.models.content_engine import QuizQuestion
+
     lesson = AwarenessRepository(session).get_by_slug(slug)
     if not lesson or lesson.status != "published":
         raise NotFoundError("Lesson not found.")
-    return ok({
-        "slug": lesson.slug, "category": lesson.category, "title": lesson.title,
-        "summary": lesson.summary, "body_md": lesson.body_md, "quiz": lesson.quiz_json,
-    }, _rid(request))
+    questions = session.scalars(select(QuizQuestion).where(
+        QuizQuestion.lesson_slug == slug, QuizQuestion.status == "published")
+        .order_by(QuizQuestion.slug)).all()
+    # Quiz questions are sent WITHOUT answers; grade via POST /awareness/{slug}/quiz.
+    return ok({**lesson_dict(lesson, full=True),
+               "quiz": [quizsvc.public_question(q) for q in questions]}, _rid(request))
+
+
+class _Answers(BaseModel):
+    answers: dict[str, int] = Field(default_factory=dict, max_length=50)
+
+
+@router.post("/{slug}/quiz", dependencies=[Depends(require_feature("awareness"))])
+def grade_lesson_quiz(slug: str, body: _Answers, request: Request, session: Session = Depends(db_session),
+                      user: User | None = Depends(get_optional_user)):
+    from app.content import quiz as quizsvc
+    from app.db.models.content_engine import QuizQuestion
+
+    slugs = list(session.scalars(select(QuizQuestion.slug).where(
+        QuizQuestion.lesson_slug == slug, QuizQuestion.status == "published")).all())
+    if not slugs:
+        raise NotFoundError("This lesson has no quiz.")
+    result = quizsvc.grade(session, slugs=slugs, answers=body.answers, user_id=user.id if user else None,
+                           kind="lesson", period=None)
+    if user and result["total"] and all(r["choice"] is not None for r in result["results"]):
+        quizsvc.mark_lesson(session, user.id, slug, completed=True)
+    return ok(result, _rid(request))
 
 
 # Mounted separately so it is not shadowed by /awareness/{slug}.
 challenges_router = APIRouter(prefix="/challenges", tags=["awareness"])
 
 
+def _challenge_question(session: Session):
+    from app.content import learning, quiz as quizsvc
+
+    sel = learning.daily_challenge(session)
+    qs = quizsvc.load_questions(session, sel.refs) if sel else []
+    return sel, (qs[0] if qs else None)
+
+
 @challenges_router.get("/daily", dependencies=[Depends(require_feature("awareness"))])
-def daily_challenge(request: Request, session: Session = Depends(db_session)):
-    active = ChallengeRepository(session).active()
-    if not active:
+def daily_challenge(request: Request, session: Session = Depends(db_session),
+                    user: User | None = Depends(get_optional_user)):
+    """Today's challenge, from the reviewed question bank. No answer in the payload."""
+    from app.content import quiz as quizsvc
+
+    sel, q = _challenge_question(session)
+    if q is None:
         raise NotFoundError("No challenge available.")
-    # Deterministic daily pick (rotates by day-of-year).
-    idx = dt.date.today().toordinal() % len(active)
-    c = active[idx]
-    return ok({
-        "slug": c.slug, "kind": c.kind, "question": c.question,
-        "options": c.options_json, "answer_index": c.answer_index,
-        "explanation": c.explanation,
-    }, _rid(request))
+    prior = quizsvc.existing_attempt(session, user.id, "challenge", sel.period) if user else None
+    return ok({"slug": q.slug, "id": q.slug, "kind": q.qtype, "question": q.prompt, "options": q.options,
+               "category": q.category, "date": sel.period,
+               "attempt": quizsvc.attempt_results(session, prior) if prior else None}, _rid(request))
+
+
+class _Choice(BaseModel):
+    choice: int = Field(ge=0, le=10)
+
+
+@challenges_router.post("/daily", dependencies=[Depends(require_feature("awareness"))])
+def answer_challenge(body: _Choice, request: Request, session: Session = Depends(db_session),
+                     user: User | None = Depends(get_optional_user)):
+    from app.content import quiz as quizsvc
+
+    sel, q = _challenge_question(session)
+    if q is None:
+        raise NotFoundError("No challenge available.")
+    return ok(quizsvc.grade(session, slugs=[q.slug], answers={q.slug: body.choice},
+                            user_id=user.id if user else None, kind="challenge", period=sel.period), _rid(request))

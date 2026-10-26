@@ -4,42 +4,67 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
-    <title>CyberShield 360 — Security Warning</title>
+    <title>CyberShield360 — Malicious Website Blocked</title>
     <style>
-      .center { max-width: 560px; margin: 8vh auto; padding: 0 16px; }
-      .shield { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center;
-                background: rgba(248,113,113,0.15); color: #f87171; font-size: 28px; }
-      h1 { font-size: 22px; margin: 16px 0 6px; }
+      html { background: #0C0707; }
+      body { min-height: 100vh; background:
+        radial-gradient(900px 520px at 50% 0%, rgba(255,93,101,0.22), transparent 65%),
+        radial-gradient(700px 400px at 50% 110%, rgba(255,93,101,0.10), transparent 60%), #0C0707; }
+      .panel { position: relative; max-width: 560px; margin: 7vh auto; padding: 28px 28px 22px; border-radius: 22px; text-align: center;
+        border: 1px solid rgba(255,93,101,0.28); background: rgba(24,10,11,0.75); box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7); }
+      .close { position: absolute; right: 14px; top: 14px; width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: #C9A9AB; cursor: pointer; display: grid; place-items: center; }
+      .close:hover { background: rgba(255,255,255,0.06); color: #fff; }
+      .brand { justify-content: center; }
+      .warn { margin: 18px auto 6px; width: 92px; height: 92px; display: grid; place-items: center; color: #FF5D65; filter: drop-shadow(0 0 26px rgba(255,93,101,0.6)); }
+      h1 { font-family: "Space Grotesk", "Inter", sans-serif; font-size: 26px; margin: 6px 0 8px; }
+      .url-pill { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; margin-top: 12px; padding: 6px 12px; border-radius: 999px;
+        border: 1px solid rgba(255,93,101,0.4); background: rgba(255,93,101,0.08); color: #FFC2C5; font-size: 13px; word-break: break-all; }
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 20px; border: 1px solid rgba(255,93,101,0.22); border-radius: 14px; overflow: hidden; text-align: left; }
+      .stats > div { padding: 12px 14px; background: rgba(255,255,255,0.02); }
+      .stats > div + div { border-left: 1px solid rgba(255,93,101,0.18); }
+      .stat-k { font-size: 12px; color: #B79A9C; }
+      .stat-v { margin-top: 4px; font-size: 16px; font-weight: 600; }
+      .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+      .btn.outline-danger { background: transparent; color: #FF8A90; border: 1px solid #FF5D65; padding: 11px; font-size: 14px; }
+      .btn.outline-danger:hover { background: rgba(255,93,101,0.1); }
+      .btn.danger { padding: 11px; font-size: 14px; box-shadow: 0 0 24px rgba(255,93,101,0.35); }
+      .proceed { margin-top: 16px; background: none; border: 0; color: #B79A9C; text-decoration: underline; font-size: 13px; cursor: pointer; }
+      .proceed:hover { color: #fff; }
+      @media (max-width: 480px) { .stats { grid-template-columns: 1fr; } .stats > div + div { border-left: 0; border-top: 1px solid rgba(255,93,101,0.18); } }
     </style>
   </head>
   <body>
-    <div class="center">
-      <div class="shield">⛔</div>
-      <h1>This site was blocked by CyberShield 360</h1>
-      <p class="muted" id="sub">The destination matches a known-malicious entry.</p>
+    <main class="panel">
+      <button id="close" class="close" aria-label="Close this tab" title="Close tab">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="brand"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#42F5C5"/><stop offset="1" stop-color="#19E6A0"/></linearGradient></defs><path d="M16 2.5 4.5 7v8.2c0 7 4.9 12.4 11.5 14.3 6.6-1.9 11.5-7.3 11.5-14.3V7L16 2.5Z" fill="rgba(25,230,160,0.12)" stroke="url(#lg)" stroke-width="2"/><path d="m11 16.2 3.4 3.4L21.5 12" fill="none" stroke="url(#lg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>CyberShield<span class="accent">360</span></span></div>
 
-      <div class="card mt2">
-        <div class="row between"><span class="muted small">Blocked destination</span>
-          <span id="threat" class="badge" style="color:#f87171;background:rgba(248,113,113,0.14)">Known threat</span></div>
-        <div id="domain" style="font-weight:600;word-break:break-all;margin-top:4px;">—</div>
-        <div id="meta" class="small muted mt"></div>
-        <div class="small muted mt">
-          This domain is on CyberShield 360's known-bad list (high confidence). It is
-          commonly associated with phishing or scams. A block is a strong signal, but
-          you can go back or, if you are certain, proceed at your own risk.
-        </div>
+      <div class="warn" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="92" height="92" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M28.3 9.6 4.6 50.5A4.3 4.3 0 0 0 8.3 57h47.4a4.3 4.3 0 0 0 3.7-6.5L35.7 9.6a4.3 4.3 0 0 0-7.4 0Z" fill="rgba(255,93,101,0.12)"/><path d="M32 24v14M32 46v.5"/></svg>
       </div>
+      <h1>Malicious Website Blocked</h1>
+      <p class="muted" id="sub">This website is on CyberShield360's known-malicious list and may try to steal your personal information.</p>
+      <div class="url-pill"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg><span id="domain">—</span></div>
 
-      <div class="row mt2">
-        <button id="back" class="btn primary">Go back to safety</button>
-        <button id="proceed" class="btn">Proceed anyway (not recommended)</button>
+      <div class="stats">
+        <div><div class="stat-k">Risk Level</div><div class="stat-v" id="level" style="color:#FF5D65">High</div></div>
+        <div><div class="stat-k">Category</div><div class="stat-v" id="threat">Known threat</div></div>
+        <div><div class="stat-k">Confidence</div><div class="stat-v" id="conf">High</div></div>
       </div>
+      <div id="meta" class="small muted mt"></div>
+
+      <div class="actions">
+        <button id="back" class="btn outline-danger">Go Back</button>
+        <a id="details" class="btn danger" href="#" target="_blank" rel="noopener">View Details</a>
+      </div>
+      <button id="proceed" class="proceed">I understand the risk, continue anyway</button>
+
       <div class="row between small mt2">
-        <a id="report" href="#" target="_blank">Report incorrect detection</a>
-        <a id="details" href="#" target="_blank">Learn more</a>
+        <a id="report" href="#" target="_blank" rel="noopener">Report incorrect detection</a>
+        <span class="muted">Assessments, not guarantees.</span>
       </div>
-      <p class="small muted mt2">CyberShield 360 provides assessments, not guarantees.</p>
-    </div>
+    </main>
     <script type="module" src="warning.js"></script>
   </body>
 </html>

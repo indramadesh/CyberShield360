@@ -3,22 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CyberShield 360</title>
-    <meta name="description" content="Analyze suspicious links, messages, QR codes, emails and images." />
+    <title>CyberShield360 — Stay one step ahead online</title>
+    <meta name="description" content="Investigate suspicious links, messages, emails, images and QR codes, and make safer decisions online." />
+    <meta name="theme-color" content="#F3F9F6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#06110F" media="(prefers-color-scheme: dark)" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
     <script>
-      // Apply persisted / system theme before paint to avoid a flash.
-      // Dark-first: default to dark unless the user or system prefers light.
+      // Dark is the brand default; only switch to light if the user chose it.
+      // Also apply the in-app "reduce motion" preference before first paint.
       (function () {
         try {
           var t = localStorage.getItem("cs360-theme");
-          if (!t) t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
           document.documentElement.classList.toggle("dark", t === "dark");
-        } catch (e) {
-          document.documentElement.classList.add("dark");
-        }
+          if (localStorage.getItem("cs360-reduce-motion") === "1") {
+            document.documentElement.classList.add("reduce-motion");
+          }
+        } catch (e) {}
       })();
     </script>
   </head>

@@ -15,11 +15,14 @@ function authHeader(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
+/** `anonymous`: send without the session token (e.g. scans the user chose not to save). */
+export interface ApiOptions { anonymous?: boolean }
+
+export async function apiUpload<T>(path: string, form: FormData, opts: ApiOptions = {}): Promise<T> {
   // No Content-Type header: the browser sets the multipart boundary itself.
   const res = await fetch(`${BASE}${path}`, {
     method: "POST",
-    headers: { ...authHeader() },
+    headers: opts.anonymous ? {} : { ...authHeader() },
     body: form,
   });
   const body = (await res.json().catch(() => ({}))) as ApiEnvelope<T>;
@@ -30,12 +33,12 @@ export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
   return body.data as T;
 }
 
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(path: string, init: RequestInit = {}, opts: ApiOptions = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...authHeader(),
+      ...(opts.anonymous ? {} : authHeader()),
       ...(init.headers ?? {}),
     },
   });

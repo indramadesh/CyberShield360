@@ -36,7 +36,7 @@ async function save() {
   });
   chrome.runtime.sendMessage({ type: "REFRESH_RULES" });
   $("saveResult").textContent = "Saved ✓";
-  $("saveResult").style.color = "#34d399";
+  $("saveResult").style.color = "#19E6A0";
   setTimeout(() => ($("saveResult").textContent = ""), 2500);
 }
 
@@ -46,10 +46,10 @@ async function test() {
   try {
     const h = await getHealth();
     $("testResult").textContent = `Connected ✓ (engine ${h.engine_version})`;
-    $("testResult").style.color = "#34d399";
+    $("testResult").style.color = "#19E6A0";
   } catch (e) {
     $("testResult").textContent = `Not reachable: ${e.message}`;
-    $("testResult").style.color = "#fb923c";
+    $("testResult").style.color = "#FF8B4D";
   }
 }
 
@@ -60,7 +60,7 @@ async function grant() {
   try {
     const granted = await chrome.permissions.request({ origins: [origin + "/*"] });
     $("testResult").textContent = granted ? "Access granted ✓" : "Access not granted.";
-    $("testResult").style.color = granted ? "#34d399" : "#fb923c";
+    $("testResult").style.color = granted ? "#19E6A0" : "#FF8B4D";
   } catch (e) {
     $("testResult").textContent = "Could not request access: " + e.message;
   }
@@ -72,7 +72,7 @@ $("grantBtn").addEventListener("click", grant);
 $("clearCacheBtn").addEventListener("click", async () => {
   await clearCache();
   $("saveResult").textContent = "Cache cleared ✓";
-  $("saveResult").style.color = "#34d399";
+  $("saveResult").style.color = "#19E6A0";
   setTimeout(() => ($("saveResult").textContent = ""), 2500);
 });
 

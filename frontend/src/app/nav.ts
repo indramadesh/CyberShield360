@@ -1,6 +1,6 @@
 import {
-  LayoutDashboard, Link2, MessageSquare, Mail, Image, QrCode, Globe,
-  LifeBuoy, GraduationCap, Newspaper, ShieldCheck, Puzzle,
+  LayoutDashboard, ScanSearch, ShieldCheck, Siren, Newspaper, GraduationCap, FileText,
+  LifeBuoy, Settings, ShieldEllipsis, CalendarClock, Scale, ListChecks,
 } from "lucide-react";
 import type { FeatureKey } from "@/types";
 
@@ -11,49 +11,34 @@ export interface NavItem {
   feature?: FeatureKey;
   adminOnly?: boolean;
   end?: boolean;
+  /** Extra path prefixes that should mark this item active. */
+  match?: string[];
 }
 
-export interface NavGroup {
-  heading: string;
-  items: NavItem[];
-}
-
-/** Every link points to a route that actually exists — no dead links.
- *  Scanner links deep-link to the unified /app/scan page with a preselected tab. */
-export const NAV_GROUPS: NavGroup[] = [
-  {
-    heading: "Overview",
-    items: [
-      { label: "Dashboard", to: "/app", icon: LayoutDashboard, end: true },
-      { label: "Browser extension", to: "/browser-protection", icon: Puzzle },
-    ],
-  },
-  {
-    heading: "Threat analysis",
-    items: [
-      { label: "URL", to: "/app/scan?type=URL", icon: Link2, feature: "url_scanner" },
-      { label: "Message", to: "/app/scan?type=MESSAGE", icon: MessageSquare, feature: "message_scanner" },
-      { label: "Email", to: "/app/scan?type=EMAIL", icon: Mail, feature: "email_scanner" },
-      { label: "Image", to: "/app/scan?type=IMAGE", icon: Image, feature: "image_scanner" },
-      { label: "QR code", to: "/app/scan?type=QR", icon: QrCode, feature: "qr_scanner" },
-      { label: "Website", to: "/app/scan?type=WEBSITE", icon: Globe, feature: "website_scanner" },
-    ],
-  },
-  {
-    heading: "Guidance",
-    items: [
-      { label: "I was scammed", to: "/app/incident", icon: LifeBuoy, feature: "incident_response" },
-    ],
-  },
-  {
-    heading: "Learning",
-    items: [
-      { label: "Learn", to: "/app/learn", icon: GraduationCap, feature: "awareness" },
-      { label: "Intelligence", to: "/app/intel", icon: Newspaper, feature: "cyber_news" },
-    ],
-  },
-  {
-    heading: "Administration",
-    items: [{ label: "Admin", to: "/app/admin", icon: ShieldCheck, adminOnly: true }],
-  },
+/** Every link points to a route that actually exists — no dead links. */
+export const NAV_MAIN: NavItem[] = [
+  { label: "Dashboard", to: "/app", icon: LayoutDashboard, end: true },
+  { label: "Scan & Analyze", to: "/app/scan", icon: ScanSearch, match: ["/app/scans"] },
+  { label: "Browser Protection", to: "/browser-protection", icon: ShieldCheck },
+  { label: "Today's Updates", to: "/app/updates", icon: CalendarClock, feature: "cyber_news" },
+  { label: "Live Alerts", to: "/app/alerts", icon: Siren, feature: "cyber_news" },
+  { label: "News & Advisories", to: "/app/news", icon: Newspaper, feature: "cyber_news" },
+  { label: "Cyber Law Tracker", to: "/app/law", icon: Scale, feature: "cyber_law" },
+  { label: "Learning Hub", to: "/app/learn", icon: GraduationCap, feature: "awareness" },
+  { label: "Daily Quiz", to: "/app/quiz", icon: ListChecks, feature: "awareness" },
+  { label: "My Reports", to: "/app/reports", icon: FileText },
+  { label: "Settings", to: "/app/settings", icon: Settings },
 ];
+
+export const NAV_BOTTOM: NavItem[] = [
+  { label: "I was scammed", to: "/app/incident", icon: LifeBuoy, feature: "incident_response" },
+  { label: "Admin", to: "/app/admin", icon: ShieldEllipsis, adminOnly: true },
+];
+
+export function sectionTitle(pathname: string): string {
+  const all = [...NAV_MAIN, ...NAV_BOTTOM];
+  if (pathname === "/app") return "Dashboard";
+  if (pathname.startsWith("/app/scans/")) return "Scan report";
+  const hit = all.find((n) => n.to !== "/app" && pathname.startsWith(n.to));
+  return hit?.label ?? "CyberShield360";
+}

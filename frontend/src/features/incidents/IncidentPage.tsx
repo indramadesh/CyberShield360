@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { Phone, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { apiFetch } from "@/services/api";
@@ -37,21 +37,24 @@ export function IncidentPage() {
       <PageHeader title="I think I was scammed"
         description="Answer a few questions to get tailored next steps. We never file a report for you." />
 
+      <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl border border-danger/30 bg-danger-soft/40 p-4 text-sm">
+        <span className="font-medium text-danger">Lost money? Act within the first hours.</span>
+        <a href="tel:1930" className="inline-flex items-center gap-1.5 font-semibold hover:text-primary"><Phone className="size-4" /> Call 1930</a>
+        <a href="https://cybercrime.gov.in" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-primary"><Globe className="size-4" /> cybercrime.gov.in</a>
+      </div>
+
       <Card>
-        <CardHeader><CardTitle className="text-base">What happened?</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">What happened? Select everything that applies.</CardTitle></CardHeader>
         <CardContent>
-          <div>
-            {QUESTIONS.map((q, i) => {
+          <div className="grid gap-2 sm:grid-cols-2">
+            {QUESTIONS.map((q) => {
               const checked = !!answers[q.key];
               return (
-                <div key={q.key}>
-                  {i > 0 && <Separator />}
-                  <label className="flex cursor-pointer select-none items-center gap-3 py-3 text-sm">
-                    <input type="checkbox" checked={checked} className="size-4 accent-primary"
-                      onChange={(e) => setAnswers({ ...answers, [q.key]: e.target.checked })} />
-                    <span className={checked ? "text-foreground" : "text-muted-foreground"}>{q.label}</span>
-                  </label>
-                </div>
+                <label key={q.key} className={`flex cursor-pointer select-none items-center gap-3 rounded-lg border px-3 py-3 text-sm transition-colors ${checked ? "border-primary/50 bg-primary/10" : "hover:border-primary/30"}`}>
+                  <input type="checkbox" checked={checked} className="size-4 accent-primary"
+                    onChange={(e) => setAnswers({ ...answers, [q.key]: e.target.checked })} />
+                  <span className={checked ? "text-foreground" : "text-muted-foreground"}>{q.label}</span>
+                </label>
               );
             })}
           </div>
@@ -71,9 +74,14 @@ export function IncidentPage() {
               <RiskBadge level={submit.data.severity} />
             </CardHeader>
             <CardContent>
-              <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
-                {submit.data.steps.map((s) => <li key={s}>{s}</li>)}
-              </ul>
+              <ol className="space-y-2.5 text-sm leading-relaxed">
+                {submit.data.steps.map((s, i) => (
+                  <li key={s} className="flex gap-2.5">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/12 text-[0.7rem] font-semibold text-primary">{i + 1}</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ol>
             </CardContent>
           </Card>
           <Card>

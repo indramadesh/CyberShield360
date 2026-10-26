@@ -144,6 +144,20 @@ synthetic demo data. When you see a line like
 
 **Leave this terminal running.**
 
+### 3d. Start the content worker (news, advisories, daily lesson/quiz)
+
+Open a **second** terminal in `backend` (activate the same virtual environment) and run:
+
+```bash
+python -m app.content.worker
+```
+
+It collects cybersecurity news and advisories from public official sources
+(CERT-In, CSK, CISA, NCSC, SANS ISC), watches official legal documents and picks
+each day's lesson, quiz and tip. No API keys are needed. Without it, news pages
+show "Not refreshed yet" (learning and quizzes still work). `run-local.bat`
+starts it for you. Details: [docs/content/CONTENT_ENGINE_DEPLOYMENT.md](docs/content/CONTENT_ENGINE_DEPLOYMENT.md).
+
 ---
 
 ## 4. Run the frontend (website)

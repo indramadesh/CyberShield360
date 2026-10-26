@@ -77,3 +77,12 @@ export function SkeletonCard() {
     </Card>
   );
 }
+
+/** Shown while a lazily loaded route chunk downloads. */
+export function RouteFallback() {
+  return (
+    <div role="status" aria-label="Loading" className="flex min-h-[40vh] items-center justify-center">
+      <span className="size-6 animate-spin rounded-full border-2 border-border border-t-primary" />
+    </div>
+  );
+}

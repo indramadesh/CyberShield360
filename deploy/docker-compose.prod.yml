@@ -30,6 +30,29 @@ services:
     command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     expose:
       - "8000"
+    healthcheck:
+      # Healthy only once migrations ran and the API answers.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # Content worker: fetches public feeds, watches legal documents and selects the
+  # daily lesson / quiz / tip. Persistent process (never the browser, never the
+  # web process). Safe to scale: jobs are guarded by database leases.
+  worker:
+    build:
+      context: ../backend
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      CONTENT_SCHEDULER_EMBEDDED: "false"
+    depends_on:
+      backend:
+        condition: service_healthy
+    command: python -m app.content.worker
 
   caddy:
     image: caddy:2-alpine

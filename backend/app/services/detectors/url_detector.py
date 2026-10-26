@@ -115,7 +115,7 @@ class UrlDetector(Detector):
             if brand in hay and reg != official and not host.endswith(official):
                 sig(SignalSource.DOMAIN, "brand_impersonation", 20,
                     f"The link references '{brand}' but is not on its official "
-                    f"domain ({official}).", conf=0.7, cat="IMPERSONATION", brand=brand)
+                    f"domain ({official}).", conf=0.7, cat="IMPERSONATION", brand=brand, official=official)
                 break
 
         # Indicators for threat-intel lookup: the full URL and the host/domain.

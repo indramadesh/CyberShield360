@@ -27,6 +27,12 @@ export interface PublicConfig {
   features: Record<FeatureKey, boolean>;
   threat_categories: ThreatCategory[];
   risk_thresholds: { suspicious: number; high: number; critical: number };
+  privacy?: {
+    data_retention_days: number;
+    store_raw_uploads: boolean;
+    pii_redaction: boolean;
+    max_file_size_mb: number;
+  };
 }
 
 export interface ApiError {

@@ -9,25 +9,38 @@ const conf = params.get("conf");
 const original = params.get("u"); // full original URL (auto mode)
 
 const $ = (id) => document.getElementById(id);
+const pretty = (s) => s.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
+
 $("domain").textContent = domain || "(unknown)";
-$("threat").textContent = threat.replace(/_/g, " ").toLowerCase();
+$("threat").textContent = pretty(threat);
 
 if (mode === "auto") {
-  $("sub").textContent = "Automatic analysis flagged this page as high risk.";
+  $("sub").textContent = "Automatic analysis rated this page as high risk. It may try to steal your personal information.";
+  const n = Number(score);
+  $("level").textContent = n >= 80 ? "Critical" : "High";
+  $("conf").textContent = conf ? `${conf}%` : "—";
+  $("meta").textContent = score ? `Risk score ${score}/100` : "";
+} else {
+  // Known-bad list entries are high-confidence by definition of the list.
+  $("level").textContent = "High";
+  $("conf").textContent = "High";
+  $("meta").textContent = "Matched CyberShield360's known-bad list.";
 }
-$("meta").textContent = score
-  ? `Risk score ${score}/100${conf ? ` · confidence ${conf}%` : ""}`
-  : "This domain is on CyberShield 360's known-bad list (high confidence).";
 
 getSettings().then((s) => {
-  $("report").href = `${s.appUrl}/app`;
-  $("details").href = `${s.appUrl}/browser-protection`;
+  const target = original ? decodeURIComponent(original) : domain ? `https://${domain}/` : "";
+  $("details").href = target
+    ? `${s.appUrl}/app/scan?type=URL&q=${encodeURIComponent(target)}&run=1`
+    : `${s.appUrl}/app/scan`;
+  $("report").href = `${s.appUrl}/contact`;
 });
 
-$("back").addEventListener("click", () => {
+function leave() {
   if (history.length > 1) history.back();
   else chrome.tabs?.getCurrent?.((t) => t && chrome.tabs.remove(t.id));
-});
+}
+$("back").addEventListener("click", leave);
+$("close").addEventListener("click", () => chrome.tabs?.getCurrent?.((t) => (t ? chrome.tabs.remove(t.id) : leave())));
 
 // Proceed is an explicit, informed override.
 //  - auto block  -> allow this host once (no permanent trust), then continue.

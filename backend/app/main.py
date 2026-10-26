@@ -36,9 +36,17 @@ async def lifespan(app: FastAPI):
         from app.core import runtime_config
 
         runtime_config.load(session)
+    stop_scheduler = None
+    if settings.content_scheduler_embedded:
+        # Dev convenience only; production runs `python -m app.content.worker`.
+        from app.content.scheduler import start_embedded
+
+        stop_scheduler = start_embedded(SessionLocal)
     log.info("%s started (env=%s, db=%s)", settings.app_name, settings.app_env,
              settings.database_provider)
     yield
+    if stop_scheduler is not None:
+        stop_scheduler.set()
 
 
 def create_app() -> FastAPI:

@@ -1,5 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
+import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
+import { AuthProvider } from "@/features/auth/useAuth";
 import { ScanResult } from "./ScanResult";
 import type { ScanResult as Result } from "./types";
 
@@ -22,19 +26,25 @@ const result: Result = {
   pii_found: {},
 };
 
+function wrap(ui: ReactElement) {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={qc}><MemoryRouter><AuthProvider>{ui}</AuthProvider></MemoryRouter></QueryClientProvider>);
+}
+
 describe("ScanResult", () => {
   it("shows risk and confidence separately", () => {
-    render(<ScanResult result={result} />);
+    wrap(<ScanResult result={result} />);
     expect(screen.getByRole("status").getAttribute("aria-label")).toBe("High Risk");
     expect(screen.getByText(/82%/)).toBeTruthy();
     expect(screen.getByText(/PHISHING/)).toBeTruthy();
+    expect(screen.getByText(/Risk Score 76\/100/)).toBeTruthy();
   });
 
-  it("lists evidence and keeps technical details collapsed by default", () => {
-    render(<ScanResult result={result} />);
+  it("lists evidence and keeps technical details on their own tab", () => {
+    wrap(<ScanResult result={result} />);
     expect(screen.getByText(/does not use HTTPS/)).toBeTruthy();
     expect(screen.queryByText(/Scan ID:/)).toBeNull();
-    fireEvent.click(screen.getByText(/Show technical details/));
+    fireEvent.click(screen.getByRole("tab", { name: "Technical Details" }));
     expect(screen.getByText(/Scan ID:/)).toBeTruthy();
   });
 });
