@@ -6,13 +6,13 @@ REM  Open http://localhost:5173 in your browser.
 REM ============================================================
 cd /d "%~dp0"
 
-start "CyberShield Backend"  cmd /k "cd /d %~dp0backend && (if exist .venv\Scripts\activate.bat call .venv\Scripts\activate.bat) && python -m uvicorn app.main:app --port 8000"
+start "CyberShield Backend"  cmd /k "cd /d %~dp0backend && (if exist .venv\Scripts\activate.bat call .venv\Scripts\activate.bat) && set "CONTENT_SCHEDULER_EMBEDDED=true" && python -m uvicorn app.main:app --port 8000"
 start "CyberShield Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
-REM Content worker: collects news/advisories and picks the daily lesson, quiz and tip.
-start "CyberShield Content Worker" cmd /k "cd /d %~dp0backend && (if exist .venv\Scripts\activate.bat call .venv\Scripts\activate.bat) && timeout /t 8 >nul && python -m app.content.worker"
+REM The backend also refreshes news, advisories, law updates and the daily
+REM lesson/quiz/tip by itself (built-in scheduler), so content stays current.
 
 echo.
-echo  CyberShield 360 is starting in three new windows (backend, frontend, content worker)...
+echo  CyberShield 360 is starting in two new windows (backend, frontend)...
 echo.
 echo    This computer:   http://localhost:5173
 echo    Same Wi-Fi/LAN:  see the "Network:" URL in the Frontend window

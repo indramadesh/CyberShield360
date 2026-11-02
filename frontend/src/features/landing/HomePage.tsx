@@ -14,10 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { RiskGauge } from "@/components/ui/RiskGauge";
 import { LogoMark } from "@/components/brand/Logo";
 import { DemoDialog } from "./DemoDialog";
-import { GatedLink } from "@/features/auth/gate";
+import { GatedLink, GateProvider } from "@/features/auth/gate";
 import { DownloadExtensionButton } from "@/features/extension/release";
 import { useConfig } from "@/config/useConfig";
-import { useAuth } from "@/features/auth/useAuth";
 import { apiFetch } from "@/services/api";
 import type { FeatureKey } from "@/types";
 
@@ -31,7 +30,7 @@ const PILLARS = [
 const STEPS = [
   { n: "01", title: "Submit", text: "Paste a link or message, upload a screenshot, or scan a QR code." },
   { n: "02", title: "Analyze", text: "Rules, machine-learning signals and threat intelligence run together." },
-  { n: "03", title: "Understand", text: "See the risk, the confidence and every piece of evidence." },
+  { n: "03", title: "Understand", text: "See the risk, how sure we are, and every piece of evidence." },
   { n: "04", title: "Respond", text: "Get specific next steps — and help if something already happened." },
 ];
 
@@ -46,7 +45,7 @@ const METHODS: { key: FeatureKey; type: string; icon: typeof Link2; title: strin
 
 const PRINCIPLES = [
   { icon: Eye, title: "Evidence, not verdicts", text: "Every result lists the indicators behind it." },
-  { icon: Scale, title: "Risk ≠ confidence", text: "We show how risky and how sure — separately." },
+  { icon: Scale, title: "Risk and certainty, apart", text: "We show how risky and how sure — separately." },
   { icon: Lock, title: "Privacy by default", text: "Personal data is redacted before it is stored." },
   { icon: FileSearch, title: "Honest about limits", text: "“No known threats” never means guaranteed safe." },
 ];
@@ -68,7 +67,6 @@ function Section({ id, eyebrow, title, intro, children, className = "" }: {
 
 export function HomePage() {
   const { data } = useConfig();
-  const { user } = useAuth();
   const lessons = useQuery({
     queryKey: ["lessons"],
     queryFn: () => apiFetch<{ slug: string; title: string; summary: string; category: string }[]>("/awareness"),
@@ -78,6 +76,7 @@ export function HomePage() {
 
 
   return (
+    <GateProvider strict>
     <div className="min-h-screen bg-background">
       {/* ================= HERO ================= */}
       <section className="relative isolate overflow-hidden bg-background text-foreground">
@@ -108,7 +107,7 @@ export function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button size="lg" asChild>
-                <Link to={user ? "/app" : "/login?mode=register"}>Get Started <ArrowRight /></Link>
+                <Link to="/login?mode=register">Get Started <ArrowRight /></Link>
               </Button>
               <Button size="lg" variant="outline" onClick={() => setDemo(true)}
                 className="bg-background/40 backdrop-blur hover:bg-background/70">
@@ -179,10 +178,10 @@ export function HomePage() {
 
       {/* ================= EXPLAINABLE RESULTS ================= */}
       <Section eyebrow="Explainable analysis" title="See exactly why something was flagged"
-               intro="Every report separates risk from confidence and lists the evidence — no black-box verdicts.">
+               intro="Every report shows the risk and how sure we are separately, and lists the evidence — no black-box verdicts.">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <ul className="space-y-4">
-            {["Risk score and severity band, with an honest confidence level",
+            {["Risk score and severity band, with an honest “how sure we are” level",
               "Each indicator explained: what it is and why it matters",
               "Recommendations matched to what was actually found",
               "Technical details for analysts, collapsed for everyone else"].map((t) => (
@@ -277,12 +276,13 @@ export function HomePage() {
           <p className="mt-3 text-muted-foreground">Free to use. No account needed to scan — create one to keep your history.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button size="lg" asChild><GatedLink to="/app/scan">Start a scan <ArrowRight /></GatedLink></Button>
-            {!user && <Button size="lg" variant="outline" asChild><Link to="/login?mode=register">Create free account</Link></Button>}
+            <Button size="lg" variant="outline" asChild><Link to="/login?mode=register">Create free account</Link></Button>
           </div>
         </div>
       </section>
 
       <PublicFooter />
     </div>
+    </GateProvider>
   );
 }

@@ -36,7 +36,11 @@ def section(session: Session, name: str) -> dict:
     failing = [s for s in enabled if (s.consecutive_failures or 0) > 0]
     paused = [s for s in enabled if s.paused_reason]
     now = utcnow()
-    stale = last_success is None or now - last_success > dt.timedelta(hours=settings.content_stale_hours)
+    # A section is only stale once it has missed its own schedule: sources that
+    # are checked once a day (legal documents) are not stale after 12 h.
+    slowest = max((s.interval_minutes or 0 for s in enabled), default=0)
+    stale_after_hours = max(settings.content_stale_hours, round(slowest * 1.5 / 60))
+    stale = last_success is None or now - last_success > dt.timedelta(hours=stale_after_hours)
     if not enabled:
         state = "no_sources"
     elif last_success is None:
@@ -56,7 +60,7 @@ def section(session: Session, name: str) -> dict:
         "newest_item_published_at": _iso(newest), "sources_enabled": len(enabled),
         "sources_failing": len(failing), "sources_paused": len(paused),
         "unavailable_sources": [s.name for s in failing],
-        "stale_after_hours": settings.content_stale_hours,
+        "stale_after_hours": stale_after_hours,
     }
 
 

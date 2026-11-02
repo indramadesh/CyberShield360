@@ -18,12 +18,12 @@ if (mode === "auto") {
   $("sub").textContent = "Automatic analysis rated this page as high risk. It may try to steal your personal information.";
   const n = Number(score);
   $("level").textContent = n >= 80 ? "Critical" : "High";
-  $("conf").textContent = conf ? `${conf}%` : "—";
+  $("conf").textContent = conf ? `${conf}% sure` : "—";
   $("meta").textContent = score ? `Risk score ${score}/100` : "";
 } else {
   // Known-bad list entries are high-confidence by definition of the list.
   $("level").textContent = "High";
-  $("conf").textContent = "High";
+  $("conf").textContent = "Very sure";
   $("meta").textContent = "Matched CyberShield360's known-bad list.";
 }
 

@@ -1,0 +1,30 @@
+# Keeps news, advisories and legal watches fresh on free hosting, where the web
+# service sleeps when idle. Needs the repository secret DATABASE_URL (Neon).
+name: Content refresh
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      APP_ENV: production
+      DEBUG: "false"
+      DEMO_MODE: "false"
+      DATABASE_PROVIDER: postgresql
+      CONTENT_TIMEZONE: Asia/Kolkata
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements.txt "psycopg[binary]"
+      - run: python -m app.content.worker --once

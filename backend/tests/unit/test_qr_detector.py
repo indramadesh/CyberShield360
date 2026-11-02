@@ -27,3 +27,17 @@ def test_qr_with_phishing_url_inherits_url_signals():
     r = det.analyze("http://secure-login-verify.example/login")
     assert ("secure-login-verify.example", "domain") in r.indicators
     assert "no_https" in _inds(r)
+
+
+def test_refund_payee_with_invalid_vpa_is_high():
+    from app.services.engine import risk_engine
+    r = det.analyze("upi://pay?pa=refund.desk@ybl.example&pn=Refund%20Desk&am=4999&cu=INR")
+    inds = _inds(r)
+    assert {"upi_bait_payee", "upi_bait_with_amount", "upi_invalid_vpa"} <= inds
+    assert risk_engine.score(r.signals).risk_level in {"HIGH", "CRITICAL"}
+
+
+def test_valid_vpa_not_flagged_invalid():
+    for pa in ("stranger@oksbi", "shop.name-1@ybl", "9876543210@paytm"):
+        r = det.analyze(f"upi://pay?pa={pa}&pn=Shop")
+        assert "upi_invalid_vpa" not in _inds(r), pa

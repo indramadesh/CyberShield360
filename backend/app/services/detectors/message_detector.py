@@ -56,7 +56,36 @@ _FAMILIES: dict[str, tuple[float, str | None, tuple[str, ...]]] = {
     "delivery": (12, "DELIVERY_SCAM", (
         "parcel", "customs fee", "redelivery", "package held", "delivery failed",
     )),
+    "payment_demand": (15, "ADVANCE_FEE_SCAM", (
+        "delivery charge", "delivery fee", "shipping charge", "shipping fee",
+        "processing fee", "handling charge", "service charge", "token amount",
+        "small fee", "pay rs", "pay ₹", "pay inr", "to claim", "claim your",
+    )),
 }
+
+# Embedded links are checked with the URL scanner; capped so a message stuffed
+# with links can't add unbounded weight.
+_MAX_LINKS_CHECKED = 3
+_LINK_WEIGHT_CAP = 30.0
+_url_detector = None
+
+
+def _url_signals(urls: list[str]) -> list[DetectionSignal]:
+    global _url_detector
+    if _url_detector is None:  # lazy: url_detector has no dependency on us
+        from app.services.detectors.url_detector import UrlDetector
+        _url_detector = UrlDetector()
+    out: list[DetectionSignal] = []
+    for url in urls[:_MAX_LINKS_CHECKED]:
+        sub = _url_detector.analyze(url)
+        total = sum(max(0.0, s.weight) for s in sub.signals)
+        scale = min(1.0, _LINK_WEIGHT_CAP / total) if total else 1.0
+        for s in sub.signals:
+            s.weight = round(s.weight * scale, 1)
+            s.summary = f"Link in message: {s.summary}"
+            s.detail = {**s.detail, "url": url}
+            out.append(s)
+    return out
 
 
 class MessageDetector(Detector):
@@ -97,11 +126,29 @@ class MessageDetector(Detector):
                 confidence=0.65, category_hint="UPI_FRAUD",
             ))
 
+        if "reward_bait" in hit_families and "payment_demand" in hit_families:
+            signals.append(DetectionSignal(
+                source=SignalSource.RULE, indicator="reward_plus_payment",
+                weight=20, summary="A prize or reward is offered but you must pay first "
+                "to receive it — a classic advance-fee scam.", confidence=0.75,
+                category_hint="ADVANCE_FEE_SCAM",
+            ))
+
         indicators = extract_indicators(text)
-        if any(t in ("url", "domain") for _, t in indicators):
+        has_link = any(t in ("url", "domain") for _, t in indicators)
+        if has_link:
             signals.append(DetectionSignal(
                 source=SignalSource.CONTENT, indicator="contains_link", weight=6,
                 summary="The message contains a link.", confidence=0.4,
+            ))
+            signals.extend(_url_signals([v for v, t in indicators if t == "url"]))
+        lure = hit_families & {"reward_bait", "payment_demand", "credential_request", "kyc", "upi"}
+        if has_link and lure:
+            signals.append(DetectionSignal(
+                source=SignalSource.RULE, indicator="lure_plus_link",
+                weight=12, summary="The message pushes you to act on an offer or request "
+                "through a link — links like this often lead to phishing pages.",
+                confidence=0.65, category_hint="PHISHING",
             ))
 
         normalized = pii.redact(text)

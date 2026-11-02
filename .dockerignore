@@ -1,0 +1,13 @@
+.git
+**/node_modules
+**/.venv
+**/__pycache__
+**/dist
+**/*.sqlite3
+**/.env
+**/.env.*
+frontend/public/downloads
+artifacts
+tools
+docs
+test ext

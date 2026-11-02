@@ -79,6 +79,13 @@ type Tab = "overview" | "technical" | "domain" | "similar";
 
 /** The ONE result component every scanner uses. Answers, in order:
  *  what happened → why → evidence → technical detail (separate tab) → what to do. */
+/** Plain-language wording for the confidence value (shown instead of the jargon word). */
+export function sureLabel(confidence: number): string {
+  if (confidence >= 0.8) return "Very sure";
+  if (confidence >= 0.5) return "Fairly sure";
+  return "Not very sure";
+}
+
 export function ScanResult({ result, target, scannedAt }: { result: Result; target?: string; scannedAt?: string }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [confirmVisit, setConfirmVisit] = useState(false);
@@ -86,6 +93,7 @@ export function ScanResult({ result, target, scannedAt }: { result: Result; targ
   const { user } = useAuth();
   const { data: config } = useConfig();
   const confidencePct = Math.round(result.confidence * 100);
+  const sure = sureLabel(result.confidence);
 
   const report = useMutation({
     mutationFn: (value: string) => apiFetch("/reports", {
@@ -196,8 +204,9 @@ export function ScanResult({ result, target, scannedAt }: { result: Result; targ
             </div>
           </div>
           <div className="shrink-0 text-right sm:border-l sm:border-border/60 sm:pl-4">
-            <div className="text-xs text-muted-foreground">Confidence</div>
-            <div className="font-display text-xl font-semibold">{confidencePct}%</div>
+            <div className="text-xs text-muted-foreground" title="How much evidence backs this result. It is separate from the risk itself.">How sure we are</div>
+            <div className="font-display text-xl font-semibold">{sure}</div>
+            <div className="text-xs text-muted-foreground">{confidencePct}% sure</div>
           </div>
         </div>
 
@@ -259,7 +268,7 @@ export function ScanResult({ result, target, scannedAt }: { result: Result; targ
             {tab === "technical" && (
               <div className="space-y-2 rounded-xl border bg-background-2 p-4 text-xs text-muted-foreground">
                 <div>Scan ID: <span className="font-mono text-foreground">{result.scan_id}</span></div>
-                <div>Type: {result.scan_type} · Risk score: {result.risk_score}/100 · Confidence: {result.confidence.toFixed(2)} · Category: {result.category}</div>
+                <div>Type: {result.scan_type} · Risk score: {result.risk_score}/100 · How sure: {confidencePct}% · Category: {result.category}</div>
                 {result.notes.map((n) => <div key={n}>{n}</div>)}
                 {result.pii_found && Object.keys(result.pii_found).length > 0 && (
                   <div>PII detected (redacted before storage): {Object.entries(result.pii_found).map(([k, v]) => `${k}×${v}`).join(", ")}</div>

@@ -38,11 +38,11 @@ const STEPS = [
   },
   {
     icon: ShieldAlert, title: "See the risk — and why",
-    text: "A risk score, a separate confidence level and every indicator found.",
+    text: "A risk score, a separate “how sure we are” level and every indicator found.",
     screen: (
       <div className="rounded-lg border border-danger/40 bg-danger-soft/50 p-3 text-xs">
         <div className="flex items-center gap-2 font-display text-base font-semibold text-danger"><ShieldAlert className="size-4" /> High Risk</div>
-        <div className="mt-1 text-muted-foreground">Risk score 82/100 · confidence 90% · synthetic example</div>
+        <div className="mt-1 text-muted-foreground">Risk score 82/100 · 90% sure · synthetic example</div>
         <div className="mt-2 flex flex-wrap gap-1">
           {["Urgency", "Fake KYC", "Suspicious link"].map((t) => <span key={t} className="rounded border border-danger/40 px-1.5 py-0.5 text-danger">{t}</span>)}
         </div>

@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import FileResponse
 
 from app.api.v1.router import api_router
 from app.api.v1.routes import health
@@ -76,7 +79,26 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router)
     app.include_router(api_router, prefix=settings.api_v1_prefix)
+    if settings.static_dir:
+        app.add_middleware(GZipMiddleware, minimum_size=1024)
+        _serve_site(app, Path(settings.static_dir).resolve())
     return app
+
+
+def _serve_site(app: FastAPI, root: Path) -> None:
+    """Serve the built website; unknown paths get index.html for client-side routes."""
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def site(path: str):
+        if path == "api" or path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not found")
+        target = (root / path).resolve()
+        if path and target.is_file() and target.is_relative_to(root):
+            # Vite puts a content hash in asset names, so they can be cached for good.
+            immutable = path.startswith("assets/")
+            return FileResponse(target, headers={"Cache-Control": (
+                "public, max-age=31536000, immutable" if immutable else "no-cache")})
+        return FileResponse(root / "index.html", headers={"Cache-Control": "no-cache"})
 
 
 app = create_app()

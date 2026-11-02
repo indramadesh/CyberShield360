@@ -20,7 +20,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const field = "bg-background/70 border-border";
 
 export function LoginPage() {
-  const { login, register, continueAsGuest } = useAuth();
+  const { user, login, register, logout, continueAsGuest } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
@@ -89,6 +89,18 @@ export function LoginPage() {
           <LogoMark className="size-8" /> CyberShield360
         </Link>
 
+        {user ? (
+          // Arrived from a landing-page link while already signed in: continue, don't log in again.
+          <div className="w-full rounded-3xl border border-border bg-card/70 p-6 text-center shadow-[0_30px_80px_-20px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl sm:p-8">
+            <h1 className="font-display text-[1.65rem] font-semibold leading-tight">You're signed in</h1>
+            <p className="mt-2 text-sm text-muted-foreground">as <span className="font-medium text-foreground">{user.email}</span></p>
+            <Button className="mt-6 w-full" size="lg" onClick={() => navigate(next)}>Continue</Button>
+            <button type="button" onClick={() => logout()} className="mt-4 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+              Use a different account
+            </button>
+          </div>
+        ) : (
+        <>
         <div className="w-full rounded-3xl border border-border bg-card/70 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl sm:p-8">
           <div className="text-center">
             <h1 className="font-display text-[1.65rem] font-semibold leading-tight">
@@ -165,6 +177,8 @@ export function LoginPage() {
           Continue as guest
         </button>
         <p className="mt-1 text-center text-xs text-muted-foreground">Guests can use every scanner. History &amp; quizzes need an account.</p>
+        </>
+        )}
       </main>
     </div>
   );

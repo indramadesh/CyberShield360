@@ -89,7 +89,7 @@ function notify(host, data) {
     iconUrl: "icons/icon128.png",
     title: `CyberShield 360 — ${data.risk_level} (${host})`,
     message:
-      `${data.category || "No category"} · ${data.risk_score ?? 0}/100 · confidence ${conf}%` +
+      `${data.category || "No category"} · ${data.risk_score ?? 0}/100 · ${conf}% sure` +
       (ev ? `\n${ev.summary}` : "") +
       `\nClick the icon for full details.`,
     priority: 1,

@@ -29,3 +29,19 @@ def test_pii_is_redacted_in_normalized_input():
     assert "[REDACTED_PHONE]" in r.normalized_input
     assert "[REDACTED_EMAIL]" in r.normalized_input
     assert "9876543210" not in r.normalized_input
+
+
+def test_prize_that_demands_payment_with_link_is_high():
+    from app.services.engine import risk_engine
+    r = det.analyze("Congratulations! You won a free iPhone 15. Pay Rs 99 delivery "
+                    "charge now to claim: http://free-gift-claim.example/pay")
+    inds = _inds(r)
+    assert {"msg_payment_demand", "reward_plus_payment", "lure_plus_link"} <= inds
+    assert "no_https" in inds  # the embedded link is analysed too
+    assert risk_engine.score(r.signals).risk_level in {"HIGH", "CRITICAL"}
+
+
+def test_harmless_link_alone_stays_low():
+    from app.services.engine import risk_engine
+    r = det.analyze("Here are the slides: https://docs.google.com/presentation/d/abc")
+    assert risk_engine.score(r.signals).risk_level == "LOW"

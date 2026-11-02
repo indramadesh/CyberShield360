@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     secret_key: str = "dev-insecure-secret-change-me"
     api_v1_prefix: str = "/api/v1"
     cors_origins: str = "http://localhost:5173"
+    # Folder with the built website. Set for single-service hosting, where the API
+    # also serves the site; empty when a proxy (Caddy) or Vite serves it instead.
+    static_dir: str = ""
 
     # ---- Database ----
     database_provider: str = "sqlite"  # sqlite | postgresql | mysql
@@ -137,6 +140,9 @@ class Settings(BaseSettings):
     def sqlalchemy_url(self) -> str:
         """Resolve the effective DB URL, providing a SQLite dev default."""
         if self.database_url:
+            # Hosted Postgres gives plain postgresql:// URLs; we ship the psycopg 3 driver.
+            if self.database_url.startswith("postgresql://"):
+                return "postgresql+psycopg://" + self.database_url[len("postgresql://"):]
             return self.database_url
         if self.database_provider == "sqlite":
             db_path = BACKEND_DIR / "cybershield.dev.sqlite3"

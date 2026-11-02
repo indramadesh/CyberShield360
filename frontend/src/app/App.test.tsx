@@ -87,6 +87,21 @@ describe("App shell (blank-screen guard)", () => {
     }
   });
 
+  it("landing stays strict even after 'continue as guest'", () => {
+    localStorage.setItem("cs360-guest", "1");
+    renderAt("/");
+    const nav = screen.getByRole("navigation", { name: "Primary" });
+    for (const label of ["Home", "Tools", "News", "Learn", "Extension", "About"]) {
+      expect(within(nav).getByText(label).closest("a")?.getAttribute("href")).toMatch(/^\/login\?mode=register&next=/);
+    }
+    expect(screen.getByLabelText("CyberShield360 home").getAttribute("href")).toMatch(/^\/login\?mode=register/);
+    // Pillars, method cards and footer links also go to sign-up.
+    const all = [...document.querySelectorAll("a")].map((a) => a.getAttribute("href") ?? "");
+    const direct = all.filter((h) => h.startsWith("/") && !h.startsWith("/login") && !h.startsWith("/downloads/"));
+    expect(direct).toEqual([]);
+    localStorage.clear();
+  });
+
   it("shows a 404 for unknown routes", () => {
     renderAt("/definitely-not-a-page");
     expect(screen.getByText("404")).toBeTruthy();

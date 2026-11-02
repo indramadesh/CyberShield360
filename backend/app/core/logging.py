@@ -55,7 +55,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "no-referrer")
         response.headers.setdefault("X-Frame-Options", "DENY")
-        if not any(request.url.path.startswith(p) for p in self._DOCS_PATHS):
+        path = request.url.path
+        # When the API also serves the website, the strict policy would block its scripts.
+        is_site = settings.static_dir and not path.startswith(("/api/", "/health", "/ready"))
+        if not is_site and not any(path.startswith(p) for p in self._DOCS_PATHS):
             response.headers.setdefault(
                 "Content-Security-Policy",
                 "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",

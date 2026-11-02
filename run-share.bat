@@ -13,7 +13,7 @@ if not exist "tools\cloudflared.exe" (
   powershell -Command "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe' -OutFile 'tools\cloudflared.exe' -UseBasicParsing"
 )
 
-start "CyberShield Backend"  cmd /k "cd /d %~dp0backend && (if exist .venv\Scripts\activate.bat call .venv\Scripts\activate.bat) && python -m uvicorn app.main:app --port 8000"
+start "CyberShield Backend"  cmd /k "cd /d %~dp0backend && (if exist .venv\Scripts\activate.bat call .venv\Scripts\activate.bat) && set "CONTENT_SCHEDULER_EMBEDDED=true" && python -m uvicorn app.main:app --port 8000"
 start "CyberShield Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
 
 echo.

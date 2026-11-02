@@ -35,7 +35,9 @@ describe("ScanResult", () => {
   it("shows risk and confidence separately", () => {
     wrap(<ScanResult result={result} />);
     expect(screen.getByRole("status").getAttribute("aria-label")).toBe("High Risk");
-    expect(screen.getByText(/82%/)).toBeTruthy();
+    expect(screen.getByText("How sure we are")).toBeTruthy();
+    expect(screen.getByText("Very sure")).toBeTruthy();
+    expect(screen.getByText(/82% sure/)).toBeTruthy();
     expect(screen.getByText(/PHISHING/)).toBeTruthy();
     expect(screen.getByText(/Risk Score 76\/100/)).toBeTruthy();
   });

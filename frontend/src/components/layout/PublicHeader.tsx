@@ -77,7 +77,7 @@ export function PublicHeader({ overlay = false }: { overlay?: boolean }) {
           <Button variant="ghost" size="icon" aria-label="Search or scan" onClick={() => (gate.open ? setSearch(true) : signUp())}>
             <Search className="size-[1.1rem]" />
           </Button>
-          {user ? (
+          {user && !gate.strict ? (
             <Button size="sm" asChild><Link to="/app">Dashboard</Link></Button>
           ) : (
             <Button size="sm" asChild><Link to="/login?mode=register">Get Started</Link></Button>

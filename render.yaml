@@ -1,0 +1,30 @@
+# Render Blueprint: one free web service (website + API).
+# The database is Neon; paste its connection string when Render asks for DATABASE_URL.
+services:
+  - type: web
+    name: cybershield360
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - { key: APP_ENV, value: production }
+      - { key: DEBUG, value: "false" }
+      - { key: DEMO_MODE, value: "false" }
+      - { key: DATABASE_PROVIDER, value: postgresql }
+      - { key: REDIS_ENABLED, value: "false" }
+      - { key: TASK_BACKEND, value: eager }
+      - { key: RATE_LIMIT_ENABLED, value: "true" }
+      - { key: MOCK_LLM, value: "true" }
+      - { key: MOCK_THREAT_INTELLIGENCE, value: "true" }
+      - { key: OCR_PROVIDER, value: mock }
+      - { key: QR_DECODER, value: auto }
+      - { key: CONTENT_TIMEZONE, value: Asia/Kolkata }
+      # A sleeping free service can't run a schedule; .github/workflows/content-refresh.yml does.
+      - { key: CONTENT_SCHEDULER_EMBEDDED, value: "false" }

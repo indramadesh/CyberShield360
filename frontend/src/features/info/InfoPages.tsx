@@ -35,7 +35,7 @@ function PageIntro({ eyebrow, title, intro }: { eyebrow: string; title: string; 
 
 const VALUES = [
   { icon: Eye, title: "Explainable", text: "Every result shows the evidence behind it, so you can judge for yourself." },
-  { icon: Scale, title: "Calibrated", text: "Risk and confidence are reported separately. Low risk is never called guaranteed safe." },
+  { icon: Scale, title: "Calibrated", text: "The risk and how sure we are are shown separately. Low risk is never called guaranteed safe." },
   { icon: Lock, title: "Private", text: "Personal data such as phone numbers, emails and OTPs is redacted before storage." },
   { icon: FileSearch, title: "Open", text: "The source code, threat model and extension privacy policy are public." },
 ];

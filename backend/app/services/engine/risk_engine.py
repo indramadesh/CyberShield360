@@ -66,6 +66,9 @@ def _pick_category(signals: list[DetectionSignal]) -> str:
 
 
 def _confidence(signals: list[DetectionSignal], coverage_degraded: bool) -> float:
+    # Informational signals (weight 0, e.g. "QR decoded as: upi") are not
+    # evidence and must not inflate confidence.
+    signals = [s for s in signals if s.weight > 0]
     if not signals:
         # Absence of indicators is weak evidence, not strong proof of safety.
         return 0.3

@@ -83,6 +83,18 @@ In the extension's **Settings**, set **Backend URL** = `https://yourdomain.com` 
 **Grant access to backend host**. Re-download the ZIP from
 `https://yourdomain.com/browser-protection` whenever you ship a new extension version.
 
+## Content worker (news, advisories, daily lesson/quiz)
+The compose file runs a `worker` container next to the backend. It starts once the
+backend is healthy and keeps content fresh on its own (no browser needed).
+```bash
+docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.prod logs -f worker
+# fetch every source right now instead of waiting for the schedule:
+docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.prod exec worker \
+  python -m app.content.worker --once --force ingest_feeds
+curl -s https://yourdomain.com/api/v1/content/status   # freshness per section
+```
+Details: [content/CONTENT_ENGINE_DEPLOYMENT.md](content/CONTENT_ENGINE_DEPLOYMENT.md).
+
 ## Operations
 - Logs: `docker compose -f deploy/docker-compose.prod.yml logs -f backend`
 - Backup DB: `docker compose -f deploy/docker-compose.prod.yml exec db pg_dump -U cybershield cybershield > backup.sql`
