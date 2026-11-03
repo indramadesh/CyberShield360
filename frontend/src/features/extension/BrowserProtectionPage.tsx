@@ -3,6 +3,7 @@ import {
   Download, Puzzle, ScanSearch, Ban, Lock, CheckCircle2, AlertTriangle, Bell, ToggleRight,
   ShieldCheck, Copy, FileText, Link2, QrCode, Type, SlidersHorizontal, Settings,
 } from "lucide-react";
+import { AndroidAppCard } from "./AndroidAppCard";
 import { useExtensionRelease } from "./release";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -184,6 +185,8 @@ export function BrowserProtectionPage() {
               </CardContent>
             </Card>
           </div>
+
+          <AndroidAppCard />
 
           {/* Install steps */}
           <section id="how-to-install" className="mt-16 scroll-mt-20">

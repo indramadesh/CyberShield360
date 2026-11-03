@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+// Release signing key lives OUTSIDE the repo (never committed):
+//   %USERPROFILE%\.cybershield360elease.properties  -> storeFile, storePassword, keyAlias, keyPassword
+// Override the location with CS360_SIGNING=/path/to/release.properties.
+val signingFile = file(System.getenv("CS360_SIGNING")
+    ?: "${System.getProperty("user.home")}/.cybershield360/release.properties")
+val signingProps = Properties().apply { if (signingFile.exists()) signingFile.inputStream().use { load(it) } }
 
 android {
     namespace = "com.cybershield360.protect"
@@ -16,9 +25,21 @@ android {
         versionName = "0.2.0"
     }
 
+    signingConfigs {
+        if (signingProps.isNotEmpty()) {
+            create("release") {
+                storeFile = file(signingProps.getProperty("storeFile"))
+                storePassword = signingProps.getProperty("storePassword")
+                keyAlias = signingProps.getProperty("keyAlias")
+                keyPassword = signingProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
         }
     }
     compileOptions {

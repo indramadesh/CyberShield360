@@ -1,0 +1,17 @@
+{
+  "name": "CyberShield360 Protect",
+  "platform": "android",
+  "version": "0.2.0",
+  "version_code": 2,
+  "file": "cybershield360-protect-v0.2.0.apk",
+  "size_bytes": 651029,
+  "sha256": "f84b62a121a091763a13ad3a3135203695b193c65c200926dc8edf734605b547",
+  "build_timestamp": "2026-11-03T10:08:06.524Z",
+  "min_android": "8.1 (API 27)",
+  "release_notes": [
+    "Checks notifications only from the apps you choose, and alerts you about scams and phishing",
+    "Check a link or message yourself, or share text to CyberShield360 from any app",
+    "One-time codes, passwords and card numbers are removed on the phone before anything is sent",
+    "Not on Google Play yet: install the APK directly (see the steps)"
+  ]
+}

@@ -35,6 +35,15 @@ def test_cannot_read_outside_site_folder(site):
     assert "secret" not in r.text
 
 
+def test_apk_is_served_as_an_android_package(tmp_path, monkeypatch):
+    (tmp_path / "index.html").write_text("x")
+    (tmp_path / "apps").mkdir()
+    (tmp_path / "apps" / "app.apk").write_bytes(b"PK")
+    monkeypatch.setattr(settings, "static_dir", str(tmp_path))
+    r = TestClient(create_app()).get("/apps/app.apk")
+    assert r.headers["content-type"] == "application/vnd.android.package-archive"
+
+
 def test_plain_postgres_url_uses_psycopg(monkeypatch):
     monkeypatch.setattr(settings, "database_url", "postgresql://u:p@h/db?sslmode=require")
     assert settings.sqlalchemy_url == "postgresql+psycopg://u:p@h/db?sslmode=require"

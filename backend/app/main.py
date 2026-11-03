@@ -87,6 +87,10 @@ def create_app() -> FastAPI:
 
 def _serve_site(app: FastAPI, root: Path) -> None:
     """Serve the built website; unknown paths get index.html for client-side routes."""
+    import mimetypes
+
+    # Not in Python's default table: without it the Android app downloads as text.
+    mimetypes.add_type("application/vnd.android.package-archive", ".apk")
 
     @app.get("/{path:path}", include_in_schema=False)
     def site(path: str):
