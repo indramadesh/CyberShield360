@@ -86,6 +86,8 @@ SOURCES: list[dict] = [
         "base_url": "https://www.cert-in.org.in/",
         "feed_url": "https://www.cert-in.org.in/PDF/CERT-In_Directions_70B_28.04.2022.pdf",
         "interval_minutes": 1440, "max_bytes": 5_000_000, "max_items": 1,
+        # Large government PDFs are slow from overseas runners (GitHub Actions).
+        "timeout_seconds": 90,
         "license_notes": "Official PDF. Checked daily with conditional requests (ETag/Last-Modified); a change "
                          "creates a new version and a change candidate. The document's meaning is never inferred.",
         "attribution": "Source: CERT-In, Government of India",
@@ -97,6 +99,8 @@ SOURCES: list[dict] = [
         "base_url": "https://www.cert-in.org.in/",
         "feed_url": "https://www.cert-in.org.in/PDF/FAQs_on_CyberSecurityDirections_May2022.pdf",
         "interval_minutes": 1440, "max_bytes": 5_000_000, "max_items": 1,
+        # Large government PDFs are slow from overseas runners (GitHub Actions).
+        "timeout_seconds": 90,
         "license_notes": "Official PDF, change-watched like the Directions.",
         "attribution": "Source: CERT-In, Government of India",
         "legal_slug": "certin-directions-faq-2022",
