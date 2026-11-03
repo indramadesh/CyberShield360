@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, ScanSearch, ShieldCheck, Siren, Newspaper, GraduationCap, FileText,
-  LifeBuoy, Settings, ShieldEllipsis, CalendarClock, Scale, ListChecks, MailCheck,
+  LifeBuoy, Settings, ShieldEllipsis, CalendarClock, Scale, ListChecks, MailCheck, Smartphone,
 } from "lucide-react";
 import type { FeatureKey } from "@/types";
 
@@ -21,6 +21,7 @@ export const NAV_MAIN: NavItem[] = [
   { label: "Scan & Analyze", to: "/app/scan", icon: ScanSearch, match: ["/app/scans"] },
   { label: "Message Protection", to: "/app/protection", icon: MailCheck, feature: "message_protection" },
   { label: "Browser Protection", to: "/browser-protection", icon: ShieldCheck },
+  { label: "Android App", to: "/android", icon: Smartphone },
   { label: "Today's Updates", to: "/app/updates", icon: CalendarClock, feature: "cyber_news" },
   { label: "Live Alerts", to: "/app/alerts", icon: Siren, feature: "cyber_news" },
   { label: "News & Advisories", to: "/app/news", icon: Newspaper, feature: "cyber_news" },
