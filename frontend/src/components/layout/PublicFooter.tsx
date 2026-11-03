@@ -7,6 +7,7 @@ const COLS: { title: string; links: { label: string; to?: string; href?: string 
   { title: "Product", links: [
     { label: "Scan & Analyze", to: "/app/scan" },
     { label: "Browser Protection", to: "/browser-protection" },
+    { label: "Android App", to: "/android" },
     { label: "Learning Hub", to: "/app/learn" },
     { label: "News & Updates", to: "/app/news" },
   ] },

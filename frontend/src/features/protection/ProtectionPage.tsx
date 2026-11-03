@@ -231,7 +231,7 @@ function SourcesTab() {
             <p className="mt-1 text-sm text-muted-foreground">The Android app checks notifications from apps <b>you choose</b>. It sees only what the notification shows, not whole conversations, and Android 15+ hides one-time codes from it.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => { setPairKind("android_notifications"); pairing.reset(); }}>Pair an Android phone</Button>
-              <Button size="sm" variant="ghost" asChild><Link to="/browser-protection#android">Get the Android app</Link></Button>
+              <Button size="sm" variant="ghost" asChild><Link to="/android">Get the Android app</Link></Button>
             </div>
           </div>
           <div className="rounded-2xl border bg-card p-4 shadow-elev">

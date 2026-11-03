@@ -4,6 +4,7 @@ import { AppLayout } from "./AppLayout";
 import { RouteFallback } from "@/components/ui/states";
 import { HomePage } from "@/features/landing/HomePage";
 import { BrowserProtectionPage } from "@/features/extension/BrowserProtectionPage";
+import { AndroidAppPage } from "@/features/android/AndroidAppPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { ScanReportPage } from "@/features/scanner/ScanReportPage";
 import { ReportsPage } from "@/features/reports/ReportsPage";
@@ -35,6 +36,7 @@ export function App() {
         <Route path="/classic" element={<LandingPage />} />
         <Route path="/v2" element={<LandingV2 />} />
         <Route path="/browser-protection" element={<BrowserProtectionPage />} />
+        <Route path="/android" element={<AndroidAppPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/login" element={<LoginPage />} />

@@ -22,25 +22,6 @@ export function useExtensionRelease() {
   });
 }
 
-export interface AndroidRelease {
-  name: string; version: string; version_code: number; file: string; size_bytes: number;
-  sha256: string; build_timestamp: string; min_android: string; release_notes?: string[];
-}
-
-/** The signed Android APK published by `android/publish.mjs`. */
-export function useAndroidRelease() {
-  return useQuery({
-    queryKey: ["android-release"],
-    queryFn: async () => {
-      const r = await fetch("/apps/android-release.json", { cache: "no-store" });
-      if (!r.ok) throw new Error("not found");
-      return (await r.json()) as AndroidRelease;
-    },
-    retry: false,
-    staleTime: 5 * 60_000,
-  });
-}
-
 /** Downloads the extension ZIP directly. Disabled (and says why) if no build exists. */
 export function DownloadExtensionButton({ label = "Download Extension", ...props }: ButtonProps & { label?: string }) {
   const rel = useExtensionRelease();

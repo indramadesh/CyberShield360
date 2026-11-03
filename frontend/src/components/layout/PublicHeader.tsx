@@ -17,6 +17,7 @@ export const PUBLIC_LINKS = [
   { to: "/app/news", label: "News" },
   { to: "/app/learn", label: "Learn" },
   { to: "/browser-protection", label: "Extension" },
+  { to: "/android", label: "Android App" },
   { to: "/about", label: "About" },
 ];
 
@@ -74,13 +75,14 @@ export function PublicHeader({ overlay = false }: { overlay?: boolean }) {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button variant="ghost" size="icon" aria-label="Search or scan" onClick={() => (gate.open ? setSearch(true) : signUp())}>
+          <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label="Search or scan" onClick={() => (gate.open ? setSearch(true) : signUp())}>
             <Search className="size-[1.1rem]" />
           </Button>
           {user && !gate.strict ? (
-            <Button size="sm" asChild><Link to="/app">Dashboard</Link></Button>
+            <Button size="sm" className="hidden sm:inline-flex" asChild><Link to="/app">Dashboard</Link></Button>
           ) : (
-            <Button size="sm" asChild><Link to="/login?mode=register">Get Started</Link></Button>
+            // Phones: hidden here (no room); the hero and the menu still offer it.
+            <Button size="sm" className="hidden sm:inline-flex" asChild><Link to="/login?mode=register">Get Started</Link></Button>
           )}
           <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu" onClick={() => (gate.open ? setOpen(true) : signUp())}>
             <Menu className="size-5" />
@@ -99,8 +101,13 @@ export function PublicHeader({ overlay = false }: { overlay?: boolean }) {
                 {l.label}
               </NavLink>
             ))}
-            {!user && (
-              <Link to="/login" onClick={() => setOpen(false)} className="mt-2 rounded-md px-3 py-3 text-sm text-muted-foreground">Sign in</Link>
+            {user ? (
+              <Button className="mt-4" asChild><Link to="/app" onClick={() => setOpen(false)}>Dashboard</Link></Button>
+            ) : (
+              <>
+                <Button className="mt-4" asChild><Link to="/login?mode=register" onClick={() => setOpen(false)}>Get Started</Link></Button>
+                <Link to="/login" onClick={() => setOpen(false)} className="mt-2 rounded-md px-3 py-3 text-sm text-muted-foreground">Sign in</Link>
+              </>
             )}
           </nav>
         </SheetContent>
