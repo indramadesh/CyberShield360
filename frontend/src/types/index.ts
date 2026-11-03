@@ -13,7 +13,8 @@ export type FeatureKey =
   | "awareness"
   | "incident_response"
   | "community_reports"
-  | "campaign_detection";
+  | "campaign_detection"
+  | "message_protection";
 
 export interface ThreatCategory {
   code: string;

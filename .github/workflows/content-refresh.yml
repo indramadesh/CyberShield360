@@ -1,4 +1,4 @@
-# Keeps news, advisories and legal watches fresh on free hosting, where the web
+# Keeps news, advisories, legal watches and connected mailboxes fresh on free hosting, where the web
 # service sleeps when idle. Needs the repository secret DATABASE_URL (Neon).
 name: Content refresh
 
@@ -21,6 +21,12 @@ jobs:
       DEMO_MODE: "false"
       DATABASE_PROVIDER: postgresql
       CONTENT_TIMEZONE: Asia/Kolkata
+      # Message Protection mail sync (optional): same values as on the web service.
+      TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
+      MICROSOFT_CLIENT_SECRET: ${{ secrets.MICROSOFT_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CyberShield360 Protect</string>
+    <string name="pick_apps">Apps to check</string>
+    <string name="check_with">Check with CyberShield360</string>
+    <string name="channel_alerts">Threat alerts</string>
+    <string name="channel_alerts_desc">Warnings about scam or phishing messages</string>
+</resources>

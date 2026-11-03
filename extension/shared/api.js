@@ -77,3 +77,49 @@ export async function analyzeUrl(url, { useCache = true } = {}) {
   await cacheSet(key, data);
   return data;
 }
+
+// ---------------------------------------------------------------------------
+// Message Protection: "Check with CyberShield360" on selected text.
+// Paired -> saved to the user's Message Protection history via a revocable device
+// token (kept in chrome.storage.local, never in a web page). Not paired -> the
+// anonymous scan endpoint, exactly like the scanner page.
+// ---------------------------------------------------------------------------
+const MAX_SELECTION = 8000;
+
+export function getDeviceToken() {
+  return new Promise((resolve) => chrome.storage.local.get("deviceToken", (d) => resolve((d && d.deviceToken) || "")));
+}
+
+export async function pairDevice(code) {
+  const data = await getJson("/api/v1/msgintel/devices/pair", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code: String(code || "").trim(), device_name: "Browser extension", platform: "chrome" }),
+  });
+  await new Promise((r) => chrome.storage.local.set({ deviceToken: data.device_token }, r));
+  return data.source;
+}
+
+export function unpairDevice() {
+  return new Promise((r) => chrome.storage.local.remove("deviceToken", r));
+}
+
+export async function checkSelection(text) {
+  const clipped = String(text || "").slice(0, MAX_SELECTION);
+  const token = await getDeviceToken();
+  if (token) {
+    const d = await getJson("/api/v1/msgintel/device/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Device-Token": token },
+      body: JSON.stringify({ items: [{ source_type: "shared_text", app: "browser", text: clipped, complete: true }] }),
+    });
+    const r = (d.results || [])[0] || {};
+    if (!r.accepted) throw new Error(r.message || "The check wasn't accepted.");
+    return { saved: true, classification: r.classification, risk_level: r.risk_level, risk_score: r.risk_score,
+             headline: r.headline, path: r.report_path };
+  }
+  const s = await analyzeScan("MESSAGE", clipped);
+  const top = (s.evidence || []).find((e) => (e.weight || 0) > 0);
+  return { saved: false, risk_level: s.risk_level, risk_score: s.risk_score,
+           headline: top ? top.summary : null, path: `/app/scans/${s.scan_id}` };
+}

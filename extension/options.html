@@ -61,6 +61,20 @@
         </div>
       </div>
 
+      <div class="card mt2">
+        <div class="field">
+          <label for="pairCode">Message Protection pairing</label>
+          <div class="small muted">Right-click selected text → “Check with CyberShield360” works without pairing. Pair to save those
+            checks to your account's Message Protection history. Create a code in the web app under Message Protection → Connected sources.</div>
+          <div class="row mt">
+            <input type="text" id="pairCode" placeholder="XXXX-XXXX" maxlength="12" autocomplete="off" />
+            <button id="pairBtn" class="btn">Pair</button>
+            <button id="unpairBtn" class="btn">Unpair</button>
+          </div>
+          <span id="pairResult" class="small muted"></span>
+        </div>
+      </div>
+
       <div class="row mt2">
         <button id="saveBtn" class="btn primary">Save settings</button>
         <button id="clearCacheBtn" class="btn">Clear cache</button>

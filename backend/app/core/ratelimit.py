@@ -25,7 +25,7 @@ def clear() -> None:
 def _tier(path: str, method: str) -> tuple[str, int]:
     if path.endswith("/scans/website") or path.endswith("/scans/upload"):
         return "expensive", settings.rate_limit_expensive_per_min
-    if "/auth/login" in path or "/auth/register" in path:
+    if "/auth/login" in path or "/auth/register" in path or path.endswith("/msgintel/devices/pair"):
         return "auth", settings.rate_limit_auth_per_min
     return "default", settings.rate_limit_default_per_min
 

@@ -47,4 +47,4 @@ Register on the site, then in the Neon SQL editor run:
 ## Limits
 - Without the keep-awake job, the first visit after 15 idle minutes takes about a minute.
 - GitHub pauses scheduled workflows after 60 days without repository activity.
-- The extension needs Backend URL set to your Render address in its Settings.
+- The extension connects to https://cybershield360-ae6b.onrender.com by default. If your Render address is different, change `apiBase`/`appUrl` in `extension/shared/storage.js` and the host in `extension/manifest.json`, or set Backend URL in the extension's Settings.

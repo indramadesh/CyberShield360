@@ -86,6 +86,7 @@ class Settings(BaseSettings):
     enable_browser_extension: bool = False
     enable_user_reports: bool = True
     enable_threat_campaigns: bool = False
+    enable_message_protection: bool = True
 
     # ---- Privacy / limits ----
     store_raw_uploads: bool = False
@@ -121,6 +122,23 @@ class Settings(BaseSettings):
     content_pause_after_failures: int = 20
     # Articles older than this are pruned (by source publication date, else ingestion date).
     content_retention_days: int = 365
+
+    # ---- Message & email intelligence ----
+    # Public base URL of this deployment; OAuth redirect URIs are built from it.
+    public_base_url: str = "http://localhost:5173"
+    # Fernet key for OAuth tokens at rest. Generate one with
+    # `python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"`.
+    # Empty = derived from SECRET_KEY (fine for development; set it in production so
+    # rotating SECRET_KEY doesn't make stored tokens unreadable).
+    token_encryption_key: str = ""
+    # OAuth apps (optional). A connector is offered only when its client id + secret are set.
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    microsoft_client_id: str = ""
+    microsoft_client_secret: str = ""
+    microsoft_tenant: str = "common"
+    # How many recent messages the first mail sync looks at (later syncs are incremental).
+    mail_initial_sync_messages: int = 20
 
     # ---- Risk thresholds (operator-tunable; not universal) ----
     risk_threshold_suspicious: int = 25

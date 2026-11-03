@@ -21,16 +21,17 @@ _SHORTENERS = {"bit.ly", "tinyurl.com", "t.co", "goo.gl", "is.gd", "cutt.ly", "r
 _REDIRECT_PARAMS = ("url", "redirect", "next", "r", "u", "goto", "return")
 
 # Small configurable brand map (moves to the official_orgs table later).
-_BRANDS: dict[str, str] = {
-    "paypal": "paypal.com",
-    "google": "google.com",
-    "microsoft": "microsoft.com",
-    "apple": "apple.com",
-    "amazon": "amazon.com",
-    "netflix": "netflix.com",
-    "sbi": "onlinesbi.sbi",
-    "hdfc": "hdfcbank.com",
-    "icici": "icicibank.com",
+# First domain is the one shown to the user as "the genuine site".
+_BRANDS: dict[str, tuple[str, ...]] = {
+    "paypal": ("paypal.com", "paypal.me"),
+    "google": ("google.com", "google.co.in"),
+    "microsoft": ("microsoft.com",),
+    "apple": ("apple.com",),
+    "amazon": ("amazon.in", "amazon.com"),
+    "netflix": ("netflix.com",),
+    "sbi": ("onlinesbi.sbi", "sbi.co.in", "sbi"),
+    "hdfc": ("hdfcbank.com",),
+    "icici": ("icicibank.com",),
 }
 
 
@@ -111,8 +112,9 @@ class UrlDetector(Detector):
         # Brand impersonation: brand name appears but the registrable domain is
         # not the brand's official domain.
         hay = f"{host}{path_q}"
-        for brand, official in _BRANDS.items():
-            if brand in hay and reg != official and not host.endswith(official):
+        for brand, domains in _BRANDS.items():
+            official = domains[0]
+            if brand in hay and not any(host == d or host.endswith("." + d) for d in domains):
                 sig(SignalSource.DOMAIN, "brand_impersonation", 20,
                     f"The link references '{brand}' but is not on its official "
                     f"domain ({official}).", conf=0.7, cat="IMPERSONATION", brand=brand, official=official)

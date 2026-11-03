@@ -10,6 +10,10 @@ from app.db.models.content_engine import (
 )
 from app.db.models.feedback import ScanFeedback
 from app.db.models.incident import Incident
+from app.db.models.messaging import (
+    DeviceCredential, MessageEvent, MessageFeedback, MonitoredSource, MonitoringSettings, OAuthState,
+    OAuthToken, PairingCode, ThreatAlert, UserConsent,
+)
 from app.db.models.scan import Scan
 from app.db.models.threat import ThreatCategory
 from app.db.models.threat_intel import ThreatIntel
@@ -22,4 +26,6 @@ __all__ = [
     "ContentSource", "SourceFetchRun", "LegalDocumentVersion", "LegalChangeCandidate",
     "QuizQuestion", "DailyTip", "DailySelection", "QuizAttempt", "QuizAnswer",
     "LessonProgress", "JobLock",
+    "MonitoredSource", "UserConsent", "PairingCode", "DeviceCredential", "OAuthToken", "OAuthState",
+    "MessageEvent", "ThreatAlert", "MonitoringSettings", "MessageFeedback",
 ]

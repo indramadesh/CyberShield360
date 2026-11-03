@@ -63,6 +63,12 @@ _FAMILIES: dict[str, tuple[float, str | None, tuple[str, ...]]] = {
     )),
 }
 
+_PROTECTIVE = re.compile(r"\b(do not|don't|dont|never|not to)\s+(share|disclose|tell)")
+# "share your OTP", "send the code", "tell us the PIN" — but not "do not share your OTP".
+_ASKS_FOR_SECRET = re.compile(
+    r"(?<!not )(?<!never )(?<!n't )\b(share|send|tell|forward|give|provide|reply with|enter)\s+"
+    r"(?:\w+\s+){0,3}(otp|code|pin|password|cvv)\b")
+
 # Embedded links are checked with the URL scanner; capped so a message stuffed
 # with links can't add unbounded weight.
 _MAX_LINKS_CHECKED = 3
@@ -97,7 +103,13 @@ class MessageDetector(Detector):
         signals: list[DetectionSignal] = []
         hit_families: set[str] = set()
 
+        # A genuine one-time-code message warns you NOT to share it; only a request to
+        # share or send the code counts as asking for credentials.
+        otp_delivery = bool(_PROTECTIVE.search(low)) and not _ASKS_FOR_SECRET.search(low)
+
         for family, (weight, cat, phrases) in _FAMILIES.items():
+            if family == "credential_request" and otp_delivery:
+                continue
             matched = sorted({p for p in phrases if p in low})
             if matched:
                 hit_families.add(family)
@@ -110,6 +122,16 @@ class MessageDetector(Detector):
                     category_hint=cat,
                     detail={"matched": matched},
                 ))
+
+        asked = _ASKS_FOR_SECRET.search(low)
+        if asked and "credential_request" not in hit_families:
+            hit_families.add("credential_request")
+            weight, cat, _ = _FAMILIES["credential_request"]
+            signals.append(DetectionSignal(
+                source=SignalSource.CONTENT, indicator="msg_credential_request", weight=weight,
+                summary="Message shows 'credential request' language.", confidence=0.6,
+                category_hint=cat, detail={"matched": [asked.group(0)]},
+            ))
 
         # Combination boosts — social engineering rarely uses one lever alone.
         if "urgency" in hit_families and hit_families & {"credential_request", "kyc", "upi"}:

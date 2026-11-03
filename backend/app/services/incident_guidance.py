@@ -43,6 +43,16 @@ _RULES: dict[str, tuple[int, list[str]]] = {
         "Watch for follow-up scams that use your details; be skeptical of new contacts.",
         "Consider alerting the impersonated organization through official channels.",
     ]),
+    "account_compromised": (3, [
+        "From a device you trust, change the account's password and sign out of all other sessions.",
+        "Check the account's recovery email, phone number, forwarding rules and connected apps for changes you didn't make.",
+        "Turn on two-step verification. If you can't get in, use the provider's official account-recovery page.",
+    ]),
+    "opened_attachment": (2, [
+        "Disconnect the device from the internet if it's behaving strangely, and don't open the file again.",
+        "Run a full scan with your device's built-in security (e.g. Microsoft Defender or Google Play Protect).",
+        "If you entered any passwords after opening it, change them from a different, trusted device.",
+    ]),
     "clicked_link": (1, [
         "Do not enter any details on that page; close it.",
         "Scan the link with CyberShield if you haven't already.",

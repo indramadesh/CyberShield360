@@ -43,12 +43,16 @@ class Job:
 
 def _jobs() -> list[Job]:
     from app.content import ingest, learning, registry
+    from app.messaging import sync as mail_sync
 
     return [
         Job("sync_sources", dt.timedelta(hours=6), registry.sync_sources),
         Job("daily_selection", dt.timedelta(minutes=15), learning.ensure_today, dt.timedelta(minutes=5)),
         Job("ingest_feeds", dt.timedelta(minutes=10), ingest.run_due),
         Job("prune_old_articles", dt.timedelta(hours=24), ingest.prune),
+        # Message intelligence: read-only mail sync and retention.
+        Job("mail_sync", dt.timedelta(minutes=5), mail_sync.sync_all, dt.timedelta(minutes=10)),
+        Job("msgintel_retention", dt.timedelta(hours=6), mail_sync.prune),
     ]
 
 

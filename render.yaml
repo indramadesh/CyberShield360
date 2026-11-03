@@ -28,3 +28,12 @@ services:
       - { key: CONTENT_TIMEZONE, value: Asia/Kolkata }
       # A sleeping free service can't run a schedule; .github/workflows/content-refresh.yml does.
       - { key: CONTENT_SCHEDULER_EMBEDDED, value: "false" }
+      # Message Protection: set PUBLIC_BASE_URL to this service's https URL. OAuth apps are optional.
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      - { key: GOOGLE_CLIENT_ID, sync: false }
+      - { key: GOOGLE_CLIENT_SECRET, sync: false }
+      - { key: MICROSOFT_CLIENT_ID, sync: false }
+      - { key: MICROSOFT_CLIENT_SECRET, sync: false }

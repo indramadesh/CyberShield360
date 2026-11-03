@@ -198,7 +198,7 @@ export function BrowserProtectionPage() {
                 <>Open <code className="rounded bg-muted px-1">chrome://extensions</code>.</>,
                 <>Turn on <b>Developer mode</b> (top-right).</>,
                 <>Click <b>Load unpacked</b> and pick the folder containing <code className="rounded bg-muted px-1">manifest.json</code>.</>,
-                <>Open the extension → <b>Settings</b> and set the backend URL of your CyberShield360 server.</>,
+                <>It connects to this CyberShield360 site automatically. To use your own server instead, open the extension → <b>Settings</b> and change the backend URL.</>,
               ].map((step, i) => (
                 <li key={i} className="rounded-xl border bg-card p-4 text-sm">
                   <span className="flex size-7 items-center justify-center rounded-full border border-primary/40 bg-primary/10 font-display text-xs font-semibold text-primary">{i + 1}</span>

@@ -11,6 +11,7 @@ from app.api.v1.routes import (
     extension,
     incidents,
     meta,
+    msgintel,
     news,
     reports,
     scans,
@@ -28,5 +29,6 @@ api_router.include_router(incidents.router)
 api_router.include_router(news.router)
 api_router.include_router(content.router)
 api_router.include_router(reports.router)
+api_router.include_router(msgintel.router)
 api_router.include_router(admin.router)
 api_router.include_router(extension.router)

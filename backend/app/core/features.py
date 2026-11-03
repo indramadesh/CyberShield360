@@ -22,6 +22,7 @@ FEATURE_KEYS = (
     "incident_response",
     "community_reports",
     "campaign_detection",
+    "message_protection",
 )
 
 
@@ -43,6 +44,7 @@ def current_flags() -> dict[str, bool]:
         "incident_response": settings.enable_incident_response,
         "community_reports": settings.enable_user_reports,
         "campaign_detection": settings.enable_threat_campaigns,
+        "message_protection": settings.enable_message_protection,
     }
     overrides = runtime_config.feature_overrides()
     for key, value in overrides.items():

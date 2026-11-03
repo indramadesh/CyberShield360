@@ -4,16 +4,18 @@
 //   2) AUTO-SCANS each page you open via the backend: risk >= threshold -> block
 //      (redirect to warning page), below threshold -> badge + optional notification.
 // No page content is ever read — only the navigated URL is analyzed.
-import { analyzeUrl, getBlocklist } from "./shared/api.js";
+import { analyzeUrl, checkSelection, getBlocklist } from "./shared/api.js";
 import { getSettings, allowOnce, isAllowed } from "./shared/storage.js";
 import { hostOf, isAnalyzable } from "./shared/url.js";
 
 const ALARM = "cs360-refresh-blocklist";
 const MAX_RULES = 500;
 const WARNING = "/warning.html";
+const MENU = "cs360-check-selection";
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create(ALARM, { periodInMinutes: 60 });
+  chrome.contextMenus.create({ id: MENU, title: "Check with CyberShield360", contexts: ["selection"] }, () => void chrome.runtime.lastError);
   refreshRules("installed");
 });
 chrome.runtime.onStartup.addListener(() => refreshRules("startup"));
@@ -171,4 +173,39 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     allowOnce(msg.host).then(() => sendResponse({ ok: true }));
     return true;
   }
+});
+
+// ----------------------------------------------------------------------------
+// Right-click -> "Check with CyberShield360" on selected text (user-initiated
+// only; uses the activeTab grant of that click, nothing else is read).
+// ----------------------------------------------------------------------------
+const LEVEL_TEXT = { CRITICAL: "Critical risk", HIGH: "High risk", MEDIUM: "Medium risk", SUSPICIOUS: "Suspicious",
+                     LOW: "No warning signs found", UNKNOWN: "Couldn't tell" };
+
+chrome.contextMenus.onClicked.addListener(async (info) => {
+  if (info.menuItemId !== MENU || !info.selectionText) return;
+  const id = `cs360-sel:${Date.now()}`;
+  try {
+    const r = await checkSelection(info.selectionText);
+    const s = await getSettings();
+    await chrome.storage.session.set({ [id]: (s.appUrl || "").replace(/\/+$/, "") + r.path });
+    const level = LEVEL_TEXT[r.risk_level] || r.risk_level;
+    chrome.notifications.create(id, {
+      type: "basic", iconUrl: "icons/icon128.png",
+      title: `CyberShield360: ${level}${r.risk_level !== "UNKNOWN" ? ` (${r.risk_score}/100)` : ""}`,
+      message: (r.headline || (r.risk_level === "LOW" ? "That doesn't prove it's safe. Stay careful." : "Open the report for details.")) +
+        (r.saved ? "" : " (Not saved: pair the extension in Settings to keep a history.)"),
+      priority: ["CRITICAL", "HIGH"].includes(r.risk_level) ? 2 : 0,
+    });
+  } catch (e) {
+    chrome.notifications.create(id, { type: "basic", iconUrl: "icons/icon128.png",
+      title: "CyberShield360 couldn't check that", message: String((e && e.message) || e) });
+  }
+});
+
+chrome.notifications.onClicked.addListener(async (id) => {
+  if (!id.startsWith("cs360-sel:")) return;
+  const d = await chrome.storage.session.get(id);
+  if (d[id]) chrome.tabs.create({ url: d[id] });
+  chrome.notifications.clear(id);
 });

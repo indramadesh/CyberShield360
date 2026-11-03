@@ -2,8 +2,10 @@
 // Only minimal, non-sensitive data is kept (no tokens, no full browsing history).
 
 export const DEFAULTS = {
-  apiBase: "http://localhost:8000", // CyberShield 360 backend
-  appUrl: "http://localhost:5173",  // CyberShield 360 website
+  // The live CyberShield360 deployment (website + API on one origin). For local
+  // development, change both in Settings to http://localhost:8000 / :5173.
+  apiBase: "https://cybershield360-ae6b.onrender.com", // CyberShield 360 backend
+  appUrl: "https://cybershield360-ae6b.onrender.com",  // CyberShield 360 website
   protectionEnabled: true,          // master for AUTOMATIC protection (scan + block as you browse)
   protectionLevel: "standard",      // standard | enhanced
   autoScan: true,                   // automatically check each page you open

@@ -1,5 +1,5 @@
 import { getSettings, setSettings, clearCache } from "./shared/storage.js";
-import { getHealth } from "./shared/api.js";
+import { getDeviceToken, getHealth, pairDevice, unpairDevice } from "./shared/api.js";
 import { originOf } from "./shared/url.js";
 
 const $ = (id) => document.getElementById(id);
@@ -77,3 +77,27 @@ $("clearCacheBtn").addEventListener("click", async () => {
 });
 
 load();
+
+async function showPairing() {
+  const paired = Boolean(await getDeviceToken());
+  $("pairResult").textContent = paired ? "Paired: checks are saved to your history." : "Not paired.";
+  $("unpairBtn").disabled = !paired;
+}
+
+$("pairBtn").addEventListener("click", async () => {
+  $("pairResult").textContent = "Pairing…";
+  try {
+    await pairDevice($("pairCode").value);
+    $("pairCode").value = "";
+    await showPairing();
+  } catch (e) {
+    $("pairResult").textContent = String((e && e.message) || e);
+  }
+});
+$("unpairBtn").addEventListener("click", async () => {
+  // The token is forgotten here; disconnect the source in the web app to revoke it on the server too.
+  await unpairDevice();
+  await showPairing();
+  $("pairResult").textContent += " To revoke it on the server too, disconnect it in the web app.";
+});
+showPairing();

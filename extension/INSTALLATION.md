@@ -14,7 +14,7 @@
 5. Select the folder that contains **`manifest.json`** (the extracted ZIP folder, or
    `extension/dist`). The CyberShield 360 shield icon appears in your toolbar.
 6. Click the icon → the gear/**Settings** → set:
-   - **Backend URL** — where CyberShield 360 runs (e.g. `http://localhost:8000`, or your
+   - **Backend URL** — defaults to the live site (https://cybershield360-ae6b.onrender.com). Change it to where your own CyberShield 360 runs (e.g. `http://localhost:8000`, or your
      public URL). Click **Test connection** to confirm.
    - If the backend is **not** `localhost`, click **Grant access to backend host**.
 

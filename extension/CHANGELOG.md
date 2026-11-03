@@ -4,6 +4,12 @@ The packager (`npm run package`) reads the bullet points under the current
 version's heading and publishes them as release notes on the website's
 Browser Protection page. Keep each bullet to one line.
 
+## 1.5.0
+- Works straight after install: connects to the live CyberShield360 site by default (change it in Settings for a local server)
+- New: right-click any selected text and choose "Check with CyberShield360" for an instant scam and phishing check
+- New: pair the extension with your account (Settings) to save those checks to Message Protection history
+- Adds the contextMenus permission only; pages are still never read unless you select text and ask
+
 ## 1.4.0
 - Redesigned popup: the current site's status up front (shown straight away when the page was already checked automatically), plus Scan Link / Scan QR / Scan Text / Settings tiles
 - Redesigned block page with risk level, category and confidence, and a View Details link to the full report

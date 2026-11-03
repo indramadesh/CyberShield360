@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CyberShield 360 Browser Protection",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Check suspicious links as you browse and get warned about known-malicious sites. Powered by the CyberShield 360 platform.",
   "icons": {
     "16": "icons/icon16.png",
@@ -24,16 +24,32 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "storage", "declarativeNetRequest", "alarms", "webNavigation", "notifications"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "declarativeNetRequest",
+    "alarms",
+    "webNavigation",
+    "notifications",
+    "contextMenus"
+  ],
   "host_permissions": [
+    "https://cybershield360-ae6b.onrender.com/*",
     "http://localhost:8000/*",
     "http://127.0.0.1:8000/*"
   ],
-  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
   "web_accessible_resources": [
     {
-      "resources": ["warning.html"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "warning.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }

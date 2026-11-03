@@ -22,6 +22,8 @@ import { AboutPage, ContactPage, ForgotPasswordPage, NotFoundPage } from "@/feat
 const LandingPage = lazy(() => import("@/features/dashboard/LandingPage").then((m) => ({ default: m.LandingPage })));
 const LandingV2 = lazy(() => import("@/features/landing-v2/LandingV2").then((m) => ({ default: m.LandingV2 })));
 const AdminPage = lazy(() => import("@/features/admin/AdminPage").then((m) => ({ default: m.AdminPage })));
+const ProtectionPage = lazy(() => import("@/features/protection/ProtectionPage").then((m) => ({ default: m.ProtectionPage })));
+const ItemReportPage = lazy(() => import("@/features/protection/ItemReportPage").then((m) => ({ default: m.ItemReportPage })));
 const ScannerPage = lazy(() => import("@/features/scanner/ScannerPage").then((m) => ({ default: m.ScannerPage })));
 
 export function App() {
@@ -43,6 +45,8 @@ export function App() {
           <Route path="scan" element={<ScannerPage />} />
           <Route path="scans/:scanId" element={<ScanReportPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="protection" element={<ProtectionPage />} />
+          <Route path="protection/items/:itemId" element={<ItemReportPage />} />
           <Route path="learn" element={<LearnPage />} />
           <Route path="incident" element={<IncidentPage />} />
           <Route path="news" element={<IntelPage />} />
