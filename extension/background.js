@@ -4,21 +4,35 @@
 //   2) AUTO-SCANS each page you open via the backend: risk >= threshold -> block
 //      (redirect to warning page), below threshold -> badge + optional notification.
 // No page content is ever read — only the navigated URL is analyzed.
-import { analyzeUrl, checkSelection, getBlocklist } from "./shared/api.js";
-import { getSettings, allowOnce, isAllowed } from "./shared/storage.js";
+import { analyzeUrl, checkSelection, getBlocklist, reachable, wakeBackend } from "./shared/api.js";
+import { DEFAULTS, getSettings, setSettings, allowOnce, isAllowed } from "./shared/storage.js";
 import { hostOf, isAnalyzable } from "./shared/url.js";
 
 const ALARM = "cs360-refresh-blocklist";
 const MAX_RULES = 500;
 const WARNING = "/warning.html";
 const MENU = "cs360-check-selection";
+const OLD_DEFAULT_API = "http://localhost:8000";
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async (info) => {
   chrome.alarms.create(ALARM, { periodInMinutes: 60 });
   chrome.contextMenus.create({ id: MENU, title: "Check with CyberShield360", contexts: ["selection"] }, () => void chrome.runtime.lastError);
+  if (info.reason === "update") await repairStaleBackend();
   refreshRules("installed");
+  wakeBackend();
 });
-chrome.runtime.onStartup.addListener(() => refreshRules("startup"));
+chrome.runtime.onStartup.addListener(() => { refreshRules("startup"); wakeBackend(); });
+
+// Before 1.5.0 the default server was localhost, and saving any setting stored it.
+// After an update, if that saved localhost server isn't actually running, switch to
+// the live site so protection keeps working. A running local server is left alone.
+async function repairStaleBackend() {
+  const s = await getSettings();
+  if ((s.apiBase || "").replace(/\/+$/, "") !== OLD_DEFAULT_API) return;
+  if (await reachable(OLD_DEFAULT_API)) return;
+  await setSettings({ apiBase: DEFAULTS.apiBase, appUrl: DEFAULTS.appUrl });
+  console.info("[CyberShield] switched from unreachable localhost to", DEFAULTS.apiBase);
+}
 chrome.alarms.onAlarm.addListener((a) => { if (a.name === ALARM) refreshRules("alarm"); });
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.settings) refreshRules("settings-change");
@@ -98,6 +112,10 @@ function notify(host, data) {
   });
 }
 
+// The same tab+URL is scanned once even though both navigation events fire for it.
+const recent = new Map();     // tabId -> { url, at }
+const RECENT_MS = 30_000;
+
 async function onNavigate(details) {
   try {
     if (details.frameId !== 0) return;            // top frame only
@@ -114,6 +132,9 @@ async function onNavigate(details) {
     if (await isAllowed(host)) return;            // user chose to proceed recently
 
     if (inFlight.get(details.tabId) === url) return;
+    const last = recent.get(details.tabId);
+    if (last && last.url === url && Date.now() - last.at < RECENT_MS) return;
+    recent.set(details.tabId, { url, at: Date.now() });
     inFlight.set(details.tabId, url);
 
     let data;
@@ -143,11 +164,14 @@ async function onNavigate(details) {
   } catch (e) { console.error("[CyberShield] onNavigate error:", e); }
 }
 
-// onCommitted fires once the navigation is committed for the tab.
+// onBeforeNavigate fires before the request is sent, so the scan starts at once and
+// still runs when the site never loads (unknown domains, connection errors) — those
+// never reach onCommitted. onCommitted stays as a fallback (e.g. pages restored from
+// the back/forward cache); `recent` stops the second event from scanning again.
+chrome.webNavigation.onBeforeNavigate.addListener(onNavigate);
 chrome.webNavigation.onCommitted.addListener(onNavigate);
 
-// Clear the badge when a tab finishes a fresh navigation we didn't flag.
-chrome.tabs.onRemoved.addListener((tabId) => inFlight.delete(tabId));
+chrome.tabs.onRemoved.addListener((tabId) => { inFlight.delete(tabId); recent.delete(tabId); });
 
 // ----------------------------------------------------------------------------
 // Messages from popup / options / warning

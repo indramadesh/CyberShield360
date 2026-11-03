@@ -263,6 +263,18 @@ function SourcesTab() {
               <p className="mt-2 text-sm text-muted-foreground">
                 Enter this code in the {pairKind === "android_notifications" ? "Android app" : "extension's Settings"}. It works once and expires in {Math.round(pairing.data.expires_in_seconds / 60)} minutes.
               </p>
+              {pairKind === "android_notifications" && (
+                <>
+                  {/* On the phone itself, this opens the app with the server and code filled in.
+                      The app still asks the user to tap Pair. */}
+                  <Button className="mt-4" variant="outline" asChild>
+                    <a href={`cs360protect://pair?server=${encodeURIComponent(window.location.origin)}&code=${encodeURIComponent(pairing.data.code)}`}>
+                      On this phone? Open the app
+                    </a>
+                  </Button>
+                  <p className="mt-1 text-xs text-muted-foreground">Needs the CyberShield360 Protect app installed on this phone.</p>
+                </>
+              )}
             </div>
           ) : (
             <Button className="mt-4" disabled={pairing.isPending} onClick={() => pairKind && pairing.mutate(pairKind)}>

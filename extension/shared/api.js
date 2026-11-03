@@ -8,8 +8,21 @@ async function base() {
   return (s.apiBase || "http://localhost:8000").replace(/\/+$/, "");
 }
 
-async function getJson(path, init) {
-  const res = await fetch((await base()) + path, init);
+// A scan that hangs is worse than "unknown": give up after this long.
+// (A sleeping free-tier server can take ~1 minute to wake; see wakeBackend.)
+const TIMEOUT_MS = 15_000;
+
+async function getJson(path, init = {}, timeoutMs = TIMEOUT_MS) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), timeoutMs);
+  let res;
+  try {
+    res = await fetch((await base()) + path, { ...init, signal: ctl.signal });
+  } catch (e) {
+    throw new Error(e && e.name === "AbortError" ? "The CyberShield360 server didn't answer in time." : "Couldn't reach the CyberShield360 server.");
+  } finally {
+    clearTimeout(timer);
+  }
   let body = {};
   try { body = await res.json(); } catch { /* non-JSON */ }
   if (!res.ok || body.success === false) {
@@ -21,6 +34,20 @@ async function getJson(path, init) {
 
 export async function getHealth() {
   return getJson("/api/v1/extension/health");
+}
+
+/** Wakes a sleeping server (free hosting) so the first real scan is fast. Never throws. */
+export async function wakeBackend() {
+  try { await getJson("/health", {}, 90_000); return true; } catch { return false; }
+}
+
+/** True when `apiBase` answers /health within `ms`. */
+export async function reachable(apiBase, ms = 3000) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  try { return (await fetch(apiBase.replace(/\/+$/, "") + "/health", { signal: ctl.signal })).ok; }
+  catch { return false; }
+  finally { clearTimeout(timer); }
 }
 
 export async function getBlocklist() {

@@ -118,6 +118,21 @@ class MainActivity : Activity() {
         para(if (apps.isEmpty()) "None selected: nothing is checked yet." else "${apps.size} selected.")
         button("Choose apps") { startActivity(Intent(this, AppPickerActivity::class.java)) }
 
+        section("Check a link or message")
+        para("Paste a suspicious link, SMS, WhatsApp or email text. It's checked by the same engine and saved (redacted) to your history.")
+        val manual = input("", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE).apply {
+            hint = "https://… or the message text"; minLines = 3
+        }
+        button("Check now") {
+            val text = manual.text.toString().trim()
+            if (text.isEmpty()) {
+                Toast.makeText(this, "Paste something to check first.", Toast.LENGTH_SHORT).show()
+            } else {
+                startActivity(Intent(this, ShareActivity::class.java).putExtra(Intent.EXTRA_TEXT, text))
+                manual.setText("")
+            }
+        }
+
         section("Monitoring")
         root.addView(Switch(this).apply {
             text = "Pause checking"

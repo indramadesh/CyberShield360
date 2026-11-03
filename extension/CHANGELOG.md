@@ -4,6 +4,12 @@ The packager (`npm run package`) reads the bullet points under the current
 version's heading and publishes them as release notes on the website's
 Browser Protection page. Keep each bullet to one line.
 
+## 1.5.1
+- Fixed: risky sites scoring 50 or more weren't blocked when the site didn't load (fake or offline domains); scanning now starts before the page loads
+- Faster: the check starts as soon as you navigate, and the server is woken up when the browser starts
+- Fixed: copies that had saved the old localhost server switch to the live site automatically if localhost isn't running
+- A scan that takes longer than 15 seconds now shows "unknown" instead of hanging
+
 ## 1.5.0
 - Works straight after install: connects to the live CyberShield360 site by default (change it in Settings for a local server)
 - New: right-click any selected text and choose "Check with CyberShield360" for an instant scam and phishing check
